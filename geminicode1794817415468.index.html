@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NourishAI — Evidence-Informed Nutrition & Culturally Aware Recipes</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -35,21 +34,14 @@
             }
         }
     </script>
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .font-serif { font-family: 'Fraunces', Georgia, serif; }
         .font-mono { font-family: 'JetBrains Mono', monospace; }
-        @keyframes pulse-slow {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
-        }
-        .animate-pulse-slow { animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
     </style>
 </head>
 <body class="bg-cream-50 text-olive-900 h-full flex flex-col selection:bg-olive-200 selection:text-olive-900">
@@ -80,31 +72,32 @@
             <div class="flex items-center gap-3">
                 <select id="currency-select" aria-label="Currency" onchange="window.setCurrency(this.value)" class="text-xs font-mono font-medium bg-white border border-olive-200 rounded-lg px-2.5 py-2 text-olive-800 focus:outline-none focus:ring-2 focus:ring-olive-600 cursor-pointer shadow-xs">
                     <option value="USD">USD ($)</option>
-                    <option value="HKD">HKD ($)</option>
+                    <option value="HKD">HKD (HK$)</option>
                     <option value="EUR">EUR (€)</option>
                     <option value="GBP">GBP (£)</option>
-                    <option value="SGD">SGD ($)</option>
+                    <option value="SGD">SGD (S$)</option>
                     <option value="JPY">JPY (¥)</option>
-                    <option value="CAD">CAD ($)</option>
-                    <option value="AUD">AUD ($)</option>
+                    <option value="CAD">CAD (CA$)</option>
+                    <option value="AUD">AUD (A$)</option>
                     <option value="CNY">CNY (¥)</option>
                 </select>
                 <a href="#/chat" class="hidden sm:inline-flex items-center gap-2 bg-olive-700 hover:bg-olive-800 text-white px-4 py-2 rounded-xl text-sm font-medium shadow-sm transition">
                     <i data-lucide="sparkles" class="w-4 h-4"></i>
                     <span>Start chatting</span>
                 </a>
-                <button onclick="toggleMobileMenu()" class="md:hidden p-2 text-olive-800 hover:bg-olive-100 rounded-lg">
+                <button onclick="toggleMobileMenu()" class="md:hidden p-2 text-olive-800 hover:bg-olive-100 rounded-lg" aria-label="Toggle Menu">
                     <i data-lucide="menu" class="w-6 h-6"></i>
                 </button>
             </div>
         </div>
+
         <!-- Mobile Menu -->
         <div id="mobile-menu" class="hidden md:hidden bg-cream-100 border-b border-olive-200 px-4 py-3 flex flex-col gap-2">
-            <a href="#/recipes" class="py-2 px-3 rounded-lg hover:bg-white text-sm font-medium text-olive-800">Recipes</a>
-            <a href="#/chat" class="py-2 px-3 rounded-lg hover:bg-white text-sm font-medium text-olive-800">Nutrition Chat</a>
-            <a href="#/analyze" class="py-2 px-3 rounded-lg hover:bg-white text-sm font-medium text-olive-800">Food Check</a>
-            <a href="#/planner" class="py-2 px-3 rounded-lg hover:bg-white text-sm font-medium text-olive-800">Meal Plan</a>
-            <a href="#/bmi" class="py-2 px-3 rounded-lg hover:bg-white text-sm font-medium text-olive-800">BMI & Body</a>
+            <a href="#/recipes" onclick="toggleMobileMenu()" class="py-2 px-3 rounded-lg hover:bg-white text-sm font-medium text-olive-800">Recipes</a>
+            <a href="#/chat" onclick="toggleMobileMenu()" class="py-2 px-3 rounded-lg hover:bg-white text-sm font-medium text-olive-800">Nutrition Chat</a>
+            <a href="#/analyze" onclick="toggleMobileMenu()" class="py-2 px-3 rounded-lg hover:bg-white text-sm font-medium text-olive-800">Food Check</a>
+            <a href="#/planner" onclick="toggleMobileMenu()" class="py-2 px-3 rounded-lg hover:bg-white text-sm font-medium text-olive-800">Meal Plan</a>
+            <a href="#/bmi" onclick="toggleMobileMenu()" class="py-2 px-3 rounded-lg hover:bg-white text-sm font-medium text-olive-800">BMI & Body</a>
         </div>
     </header>
 
@@ -132,12 +125,12 @@
         </div>
     </footer>
 
-    <!-- APP SCRIPT -->
+    <!-- APPLICATION SCRIPT -->
     <script>
-        // --- CURRENCY CONVERSION RATES & SYMBOLS ---
+        // --- 1. CURRENCY CONVERTER ---
         const CURRENCIES = {
             USD: { symbol: '$', rate: 1.0 },
-            HKD: { symbol: 'HK$', rate: 7.82 },
+            HKD: { symbol: 'HK$', rate: 7.80 },
             EUR: { symbol: '€', rate: 0.92 },
             GBP: { symbol: '£', rate: 0.79 },
             SGD: { symbol: 'S$', rate: 1.35 },
@@ -151,16 +144,19 @@
         window.setCurrency = function(code) {
             currentCurrency = code;
             document.getElementById('currency-select').value = code;
-            renderApp();
+            router();
         };
 
         window.formatPrice = function(usdAmount) {
             const cur = CURRENCIES[currentCurrency] || CURRENCIES.USD;
             const converted = usdAmount * cur.rate;
+            if (currentCurrency === 'JPY') {
+                return `${cur.symbol}${Math.round(converted)}`;
+            }
             return `${cur.symbol}${converted.toFixed(2)}`;
         };
 
-        // --- RECIPE DATABASE (9 Recipes) ---
+        // --- 2. CURATED RECIPE DATABASE ---
         const RECIPES = [
             {
                 id: 'lentil-ginger-bowl',
@@ -178,27 +174,27 @@
                 sodium: '210mg',
                 potassium: '680mg',
                 omega3: '1.2g',
-                tags: ['Vegan', 'Gluten-Free', 'Low Sodium', 'High Fiber'],
+                tags: ['Vegan', 'Halal', 'Gluten-Free', 'Low Sodium', 'High Fiber'],
                 ingredients: [
                     '1 cup red lentils, rinsed',
                     '1 tsp fresh grated ginger',
                     '1/2 tsp ground turmeric',
                     '2 cups fresh baby spinach',
-                    '1 tbsp olive oil',
-                    'Juice of 1/2 lemon',
-                    'Low-sodium vegetable broth'
+                    '1 tbsp extra virgin olive oil',
+                    'Juice of 1/2 fresh lemon',
+                    '3 cups low-sodium vegetable broth'
                 ],
                 steps: [
-                    'Rinse red lentils thoroughly under cold water.',
-                    'In a medium pot, heat olive oil and sauté ginger and turmeric for 1 minute until fragrant.',
-                    'Add lentils and 3 cups of low-sodium vegetable broth. Bring to a boil, then simmer covered for 25 minutes.',
-                    'Stir in fresh baby spinach until wilted, finish with a squeeze of fresh lemon juice, and serve warm.'
+                    'Rinse red lentils thoroughly under cold water until clear.',
+                    'Heat olive oil in a medium pot over medium heat and sauté ginger and turmeric for 1 minute until fragrant.',
+                    'Add lentils and low-sodium vegetable broth. Bring to a boil, then simmer covered for 25 minutes until tender.',
+                    'Stir in baby spinach until wilted, finish with fresh lemon juice, and serve warm.'
                 ]
             },
             {
                 id: 'oat-berry-breakfast',
                 title: 'Overnight oat & berry jar',
-                subtitle: 'No-cook breakfast with oats, yogurt, berries, and chia — steady energy for mood and focus.',
+                subtitle: 'No-cook breakfast with rolled oats, yogurt, berries, and chia — steady energy for mood and focus.',
                 category: 'Mood & mind',
                 category2: 'Weight management',
                 image: 'https://images.unsplash.com/photo-1495214783159-240b8f3a7c5c?auto=format&fit=crop&w=1200&q=80',
@@ -211,25 +207,25 @@
                 sodium: '85mg',
                 potassium: '340mg',
                 omega3: '2.1g',
-                tags: ['Vegetarian', 'Gluten-Free Option', 'Brain Food'],
+                tags: ['Vegetarian', 'Halal', 'Gluten-Free Option', 'Brain Food'],
                 ingredients: [
                     '1/2 cup rolled oats',
-                    '1/2 cup Greek yogurt',
-                    '1/2 cup almond milk',
+                    '1/2 cup plain Greek yogurt',
+                    '1/2 cup unsweetened almond or soy milk',
                     '1 tbsp chia seeds',
-                    '1/2 cup mixed fresh berries (blueberries & raspberries)'
+                    '1/2 cup mixed fresh or frozen berries'
                 ],
                 steps: [
-                    'Combine rolled oats, Greek yogurt, almond milk, and chia seeds in a jar or airtight container.',
-                    'Stir well to ensure no dry pockets remain.',
-                    'Top with fresh berries, seal, and refrigerate overnight (at least 4 hours).',
-                    'Enjoy cold straight from the jar.'
+                    'Combine rolled oats, Greek yogurt, milk, and chia seeds in a jar or bowl.',
+                    'Stir thoroughly so no dry oat pockets remain.',
+                    'Top with berries, cover, and refrigerate for at least 4 hours or overnight.',
+                    'Enjoy chilled straight from the jar.'
                 ]
             },
             {
                 id: 'salmon-greens',
                 title: 'Lemon herb baked salmon with greens',
-                subtitle: 'Omega-3 rich salmon with garlicky greens — a mental-health and heart staple.',
+                subtitle: 'Omega-3 rich salmon with garlicky greens — a mental-health and cardiovascular staple.',
                 category: 'Mood & mind',
                 category2: 'Heart health',
                 image: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=1200&q=80',
@@ -242,26 +238,26 @@
                 sodium: '290mg',
                 potassium: '590mg',
                 omega3: '3.4g',
-                tags: ['Gluten-Free', 'High Protein', 'Heart Healthy'],
+                tags: ['Halal', 'Gluten-Free', 'High Protein', 'Heart Healthy'],
                 ingredients: [
-                    '1 salmon fillet (6 oz)',
-                    '2 cups Swiss chard or kale, chopped',
+                    '1 salmon fillet (approx. 170g / 6 oz)',
+                    '2 cups chopped kale or choy sum',
                     '1 clove garlic, minced',
-                    '1 lemon (half for slices, half for juice)',
+                    '1/2 lemon (sliced and juiced)',
                     '1 tsp extra virgin olive oil',
-                    'Dried oregano & black pepper'
+                    'Dried oregano & freshly cracked black pepper'
                 ],
                 steps: [
-                    'Preheat oven to 400°F (200°C). Place salmon on a parchment-lined baking sheet.',
-                    'Drizzle with half the olive oil, top with lemon slices, oregano, and black pepper. Bake for 12-15 minutes.',
-                    'Meanwhile, sauté garlic and greens in remaining olive oil for 3-4 minutes until tender.',
-                    'Serve baked salmon over the garlic greens with a squeeze of fresh lemon.'
+                    'Preheat oven to 200°C (400°F). Place salmon on a parchment-lined baking tray.',
+                    'Brush with half the olive oil, season with oregano and black pepper, and top with lemon slices. Bake 12–15 minutes.',
+                    'Meanwhile, sauté garlic and greens in remaining olive oil over medium heat for 3–4 minutes until tender.',
+                    'Plate the salmon alongside the garlic greens and finish with fresh lemon juice.'
                 ]
             },
             {
                 id: 'quinoa-black-bean-salad',
                 title: 'Avocado quinoa & black bean bowl',
-                subtitle: 'Plant protein and healthy monounsaturated fats for sustained afternoon energy and steady blood sugar.',
+                subtitle: 'Plant protein and monounsaturated fats for sustained afternoon energy and steady blood sugar.',
                 category: 'Blood sugar',
                 category2: 'Heart health',
                 image: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=1200&q=80',
@@ -274,24 +270,24 @@
                 sodium: '240mg',
                 potassium: '720mg',
                 omega3: '0.8g',
-                tags: ['Vegan', 'Gluten-Free', 'Diabetic Friendly'],
+                tags: ['Vegan', 'Halal', 'Gluten-Free', 'Blood Sugar Friendly'],
                 ingredients: [
                     '1/2 cup cooked quinoa',
-                    '1/2 cup canned black beans, rinsed',
-                    '1/4 avocado, diced',
+                    '1/2 cup canned black beans, drained & rinsed',
+                    '1/4 ripe avocado, diced',
                     '1/4 cup cherry tomatoes, halved',
-                    'Cilantro-lime dressing'
+                    '1 tbsp fresh lime juice & chopped cilantro'
                 ],
                 steps: [
-                    'Combine cooked quinoa and black beans in a bowl.',
-                    'Add diced avocado and halved cherry tomatoes.',
-                    'Toss gently with lime juice, chopped cilantro, and a touch of olive oil.'
+                    'Combine cooked quinoa and rinsed black beans in a serving bowl.',
+                    'Fold in diced avocado and halved cherry tomatoes.',
+                    'Dress with fresh lime juice, cilantro, and a drizzle of olive oil.'
                 ]
             },
             {
                 id: 'mediterranean-chickpea-stew',
                 title: 'Provençal rosemary chickpea stew',
-                subtitle: 'Rich in soluble fiber and antioxidants to support cardiovascular health and gentle weight goals.',
+                subtitle: 'Rich in soluble fiber and polyphenols to support cardiovascular health and gentle satiety.',
                 category: 'Heart health',
                 category2: 'Weight management',
                 image: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=1200&q=80',
@@ -304,24 +300,24 @@
                 sodium: '310mg',
                 potassium: '610mg',
                 omega3: '0.5g',
-                tags: ['Vegan', 'Gluten-Free', 'DASH Friendly'],
+                tags: ['Vegan', 'Halal', 'Gluten-Free', 'DASH Friendly'],
                 ingredients: [
-                    '1 can (15 oz) chickpeas, rinsed',
-                    '1 cup crushed canned tomatoes',
+                    '1 can (400g) chickpeas, drained & rinsed',
+                    '1 cup crushed no-salt-added tomatoes',
                     '1 sprig fresh rosemary',
                     '1 small yellow onion, diced',
                     '2 cloves garlic, minced'
                 ],
                 steps: [
-                    'Sauté onion and garlic in olive oil until translucent.',
+                    'Sauté diced onion and garlic in 1 tsp olive oil until translucent.',
                     'Add crushed tomatoes, chickpeas, and fresh rosemary sprig.',
-                    'Simmer on low for 25 minutes until flavors meld. Remove rosemary before serving.'
+                    'Simmer gently on low heat for 25 minutes. Remove rosemary sprig before serving.'
                 ]
             },
             {
                 id: 'turmeric-chicken-soup',
                 title: 'Golden turmeric chicken & vegetable soup',
-                subtitle: 'Comforting, immune-supporting broth with lean chicken breast, carrots, celery, and ginger.',
+                subtitle: 'Comforting, protein-rich broth with lean chicken breast, carrots, celery, and ginger.',
                 category: 'Healthy aging',
                 category2: 'Everyday healthy',
                 image: 'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1200&q=80',
@@ -334,81 +330,24 @@
                 sodium: '380mg',
                 potassium: '520mg',
                 omega3: '0.3g',
-                tags: ['Gluten-Free', 'High Protein', 'Immune Support'],
+                tags: ['Halal Option', 'Gluten-Free', 'High Protein', 'Bone & Muscle'],
                 ingredients: [
-                    '1 chicken breast, boneless skinless',
+                    '1 boneless skinless chicken breast (150g)',
                     '4 cups low-sodium chicken broth',
-                    '2 carrots, sliced',
+                    '2 medium carrots, sliced',
                     '2 stalks celery, sliced',
-                    '1 tsp ground turmeric'
+                    '1 tsp ground turmeric & 1/2 tsp grated ginger'
                 ],
                 steps: [
-                    'Simmer chicken breast in broth with carrots, celery, and turmeric until chicken is cooked through.',
-                    'Remove chicken, shred with two forks, and return to pot.',
-                    'Season with black pepper and serve hot.'
-                ]
-            },
-            {
-                id: 'roasted-pumpkin-soup',
-                title: 'Silky roasted pumpkin & ginger soup',
-                subtitle: 'High in beta-carotene and vitamin A for eye health and immune defense.',
-                category: 'Healthy aging',
-                category2: 'Mood & mind',
-                image: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=1200&q=80',
-                time: '50 min',
-                costUSD: 2.15,
-                calories: 220,
-                protein: '5g',
-                carbs: '36g',
-                fiber: '7g',
-                sodium: '290mg',
-                potassium: '780mg',
-                omega3: '0.2g',
-                tags: ['Vegan', 'Gluten-Free', 'Low Calorie'],
-                ingredients: [
-                    '3 cups pumpkin cubes',
-                    '1 onion, chopped',
-                    '1 tbsp fresh ginger',
-                    'Vegetable broth',
-                    'Pinch of nutmeg'
-                ],
-                steps: [
-                    'Roast pumpkin cubes and onion at 400°F for 30 minutes until caramelized.',
-                    'Transfer to blender with warm vegetable broth, ginger, and nutmeg. Blend until silky smooth.'
-                ]
-            },
-            {
-                id: 'chia-matcha-pudding',
-                title: 'Matcha green tea chia pudding',
-                subtitle: 'Antioxidant-rich ceremonial grade matcha paired with omega-3 chia seeds for calm, focused energy.',
-                category: 'Mood & mind',
-                category2: 'Everyday healthy',
-                image: 'https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=1200&q=80',
-                time: '10 min',
-                costUSD: 2.30,
-                calories: 240,
-                protein: '8g',
-                carbs: '22g',
-                fiber: '10g',
-                sodium: '65mg',
-                potassium: '280mg',
-                omega3: '2.5g',
-                tags: ['Vegan', 'Gluten-Free', 'Superfood'],
-                ingredients: [
-                    '1/3 cup chia seeds',
-                    '1 cup coconut milk or oat milk',
-                    '1 tsp ceremonial matcha powder',
-                    '1 tsp maple syrup'
-                ],
-                steps: [
-                    'Whisk matcha powder into milk until smooth.',
-                    'Stir in chia seeds and maple syrup. Let sit for 15 minutes, stir again, then refrigerate for 3 hours.'
+                    'Simmer chicken breast in broth with carrots, celery, turmeric, and ginger for 20 minutes until cooked through.',
+                    'Remove chicken, shred with two forks, and return to the pot.',
+                    'Season with black pepper and serve warm.'
                 ]
             },
             {
                 id: 'toba-soba-noodles',
                 title: 'Sesame ginger buckwheat soba & edamame',
-                subtitle: 'Low glycemic index whole grain buckwheat noodles loaded with plant protein and sesame goodness.',
+                subtitle: 'Low-glycemic whole-grain buckwheat noodles loaded with plant protein and toasted sesame.',
                 category: 'Blood sugar',
                 category2: 'Everyday healthy',
                 image: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=1200&q=80',
@@ -421,36 +360,139 @@
                 sodium: '320mg',
                 potassium: '410mg',
                 omega3: '0.9g',
-                tags: ['Vegan', 'Plant Protein', 'Low GI'],
+                tags: ['Vegan', 'Halal', 'East Asian', 'Low GI'],
                 ingredients: [
-                    '80g buckwheat soba noodles',
-                    '1/2 cup shelled edamame',
-                    '1 tsp sesame oil',
-                    '1 tbsp low-sodium tamari',
-                    'Green onions'
+                    '80g 100% buckwheat soba noodles',
+                    '1/2 cup shelled edamame beans',
+                    '1 tsp toasted sesame oil',
+                    '1 tbsp reduced-sodium soy sauce or tamari',
+                    '2 stalks spring onions, sliced'
                 ],
                 steps: [
-                    'Boil soba noodles and edamame for 5 minutes until tender. Drain and rinse with cold water.',
-                    'Toss with sesame oil, tamari, and chopped green onions.'
+                    'Boil soba noodles and edamame together for 5 minutes until tender. Drain and rinse under cold water.',
+                    'Toss with toasted sesame oil, reduced-sodium soy sauce, and sliced spring onions.'
+                ]
+            },
+            {
+                id: 'steamed-tofu-bok-choy',
+                title: 'Steamed silken tofu with garlic bok choy',
+                subtitle: 'Light, calcium-rich East Asian classic that comes together in 12 minutes on a tight budget.',
+                category: 'Healthy aging',
+                category2: 'Blood pressure',
+                image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=1200&q=80',
+                time: '12 min',
+                costUSD: 1.75,
+                calories: 230,
+                protein: '17g',
+                carbs: '12g',
+                fiber: '4g',
+                sodium: '270mg',
+                potassium: '540mg',
+                omega3: '0.7g',
+                tags: ['Vegan', 'Halal', 'East Asian', 'Budget Friendly'],
+                ingredients: [
+                    '200g firm or silken tofu, sliced',
+                    '2 heads baby bok choy, halved',
+                    '2 cloves garlic, finely minced',
+                    '1 tsp sesame oil',
+                    '2 tsp reduced-sodium soy sauce'
+                ],
+                steps: [
+                    'Arrange tofu slices on a heatproof plate and steam over boiling water for 6 minutes.',
+                    'Blanch bok choy for 2 minutes until bright green and crisp-tender.',
+                    'Drizzle tofu and greens with garlic, sesame oil, and reduced-sodium soy sauce.'
+                ]
+            },
+            {
+                id: 'chia-matcha-pudding',
+                title: 'Matcha green tea chia pudding',
+                subtitle: 'Antioxidant-rich matcha paired with omega-3 chia seeds for calm, sustained focus.',
+                category: 'Mood & mind',
+                category2: 'Everyday healthy',
+                image: 'https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=1200&q=80',
+                time: '10 min',
+                costUSD: 2.30,
+                calories: 240,
+                protein: '8g',
+                carbs: '22g',
+                fiber: '10g',
+                sodium: '65mg',
+                potassium: '280mg',
+                omega3: '2.5g',
+                tags: ['Vegan', 'Halal', 'Gluten-Free', 'Antioxidant Rich'],
+                ingredients: [
+                    '1/3 cup chia seeds',
+                    '1 cup unsweetened soy or oat milk',
+                    '1 tsp culinary or ceremonial matcha powder',
+                    '1 tsp pure maple syrup or honey'
+                ],
+                steps: [
+                    'Whisk matcha powder into a splash of warm milk until smooth with no lumps, then add remaining milk and maple syrup.',
+                    'Stir in chia seeds, let rest 10 minutes, stir again, and chill for at least 3 hours.'
                 ]
             }
         ];
 
-        // --- CHATBOT STATE ---
+        // --- 3. CHATBOT STATE & LOGIC ---
         let chatState = {
             goal: 'Weight management',
             diet: 'None / Omnivore',
-            budget: 'Medium ($3-$6/meal)',
+            budget: 'Low (< $3/meal)',
             messages: [
-                { role: 'assistant', content: 'Hello! I am your NourishAI nutrition guide. How can I help you eat well for your body, culture, and budget today?' }
+                { role: 'assistant', content: 'Hello! I am your NourishAI nutrition guide. Tell me what ingredients you have, your health goal, or your budget, and I will suggest practical meals and swaps.' }
             ]
         };
 
-        // --- ROUTER ---
+        function generateSmartReply(userText) {
+            const q = userText.toLowerCase();
+            const goal = chatState.goal;
+            const diet = chatState.diet;
+
+            // Filter matching recipes if possible
+            let candidates = RECIPES.slice();
+            if (diet === 'Vegan') {
+                candidates = candidates.filter(r => r.tags.includes('Vegan'));
+            } else if (diet === 'Vegetarian') {
+                candidates = candidates.filter(r => r.tags.includes('Vegan') || r.tags.includes('Vegetarian'));
+            } else if (diet === 'Halal') {
+                candidates = candidates.filter(r => r.tags.some(t => t.includes('Halal')));
+            } else if (diet === 'Gluten-Free') {
+                candidates = candidates.filter(r => r.tags.some(t => t.includes('Gluten-Free')));
+            }
+            if (candidates.length === 0) candidates = RECIPES;
+
+            if (q.includes('blood pressure') || q.includes('sodium') || q.includes('salt') || q.includes('dash')) {
+                const dish = candidates.find(r => r.id === 'lentil-ginger-bowl') || candidates[0];
+                return `For blood pressure support (${goal}), keeping sodium under 400mg per meal while boosting potassium is helpful.\n\n• Top Pick: **${dish.title}** (${window.formatPrice(dish.costUSD)}/serving, ${dish.sodium} sodium, ${dish.potassium} potassium).\n• Quick Swap: Replace regular soy sauce or table salt with lemon juice, garlic, ginger, and fresh herbs to cut sodium by over 50%.`;
+            }
+
+            if (q.includes('budget') || q.includes('cheap') || q.includes('affordable') || q.includes('money') || q.includes('save')) {
+                const cheapest = [...candidates].sort((a, b) => a.costUSD - b.costUSD).slice(0, 2);
+                return `With your **${diet}** preference and **${goal}** goal, here are two high-nutrient, budget-friendly meals in ${currentCurrency}:\n\n1. **${cheapest[0].title}** — ${window.formatPrice(cheapest[0].costUSD)}/serving (${cheapest[0].protein} protein, ${cheapest[0].calories} kcal)\n2. **${cheapest[1].title}** — ${window.formatPrice(cheapest[1].costUSD)}/serving (${cheapest[1].protein} protein, ${cheapest[1].calories} kcal)\n\nBuying dry lentils, oats, and frozen greens keeps cost per meal low without sacrificing fiber.`;
+            }
+
+            if (q.includes('sugar') || q.includes('diabetes') || q.includes('glucose') || q.includes('carb')) {
+                const lowGi = candidates.find(r => r.id === 'quinoa-black-bean-salad') || candidates[0];
+                return `To keep blood sugar steady for **${goal}**, pair complex carbohydrates with soluble fiber and protein:\n\n• Try **${lowGi.title}** (${window.formatPrice(lowGi.costUSD)}/serving, ${lowGi.fiber} fiber, ${lowGi.protein} protein).\n• Tip: Swap white rice or refined noodles for 100% buckwheat soba, quinoa, or steamed tofu with leafy greens.`;
+            }
+
+            if (q.includes('breakfast') || q.includes('morning') || q.includes('quick') || q.includes('10 min')) {
+                const quick = candidates.find(r => r.id === 'oat-berry-breakfast') || candidates[0];
+                return `For a fast, no-stress option tailored to **${diet}**, try **${quick.title}** (${window.formatPrice(quick.costUSD)}/serving, ready in ${quick.time}). It delivers ${quick.protein} of protein and ${quick.fiber} of fiber to prevent mid-morning energy crashes.`;
+            }
+
+            if (q.includes('adapt') || q.includes('swap') || q.includes('ingredient') || q.includes('fridge')) {
+                return `Here is how we can adapt any meal for **${goal}** and **${diet}**:\n\n• **Protein base:** Use lentils, edamame, eggs, tofu, or skinless chicken/fish.\n• **Volume & micronutrients:** Add 2 cups of spinach, bok choy, or broccoli to increase fullness for under 50 kcal.\n• **Flavor without excess salt:** Use ginger, garlic, turmeric, toasted sesame oil, or citrus.\n\nTell me 2–3 ingredients in your kitchen right now and I will build a dish around them!`;
+            }
+
+            const pick = candidates[0];
+            return `Tailored to your **${goal}** goal and **${diet}** preference:\n\n• **Recommended Dish:** **${pick.title}** (${window.formatPrice(pick.costUSD)}/serving • ${pick.calories} kcal • ${pick.protein} protein)\n• **Why it fits:** ${pick.subtitle}\n\nYou can open any dish in the **Recipes** tab for step-by-step instructions, or ask me for specific ingredient swaps!`;
+        }
+
+        // --- 4. ROUTER & NAVIGATION ---
         function router() {
             const hash = window.location.hash || '#/';
             const app = document.getElementById('app');
-            window.scrollTo(0, 0);
 
             if (hash === '#/' || hash === '') {
                 renderHome(app);
@@ -468,15 +510,18 @@
             } else if (hash === '#/bmi') {
                 renderBmi(app);
             } else {
-                app.innerHTML = `<div class="max-w-7xl mx-auto px-4 py-24 text-center"><h1 class="font-serif text-3xl font-bold">Page not found</h1><p class="mt-4 text-olive-600">The page you are looking for does not exist.</p><a href="#/" class="mt-6 inline-block bg-olive-700 text-white px-6 py-2.5 rounded-xl">Return Home</a></div>`;
+                renderHome(app);
             }
-            lucide.createIcons();
+            if (window.lucide) {
+                lucide.createIcons();
+            }
             updateActiveNav(hash);
         }
 
         function updateActiveNav(hash) {
             document.querySelectorAll('.nav-link').forEach(link => {
-                if (link.getAttribute('href') === hash || (hash.startsWith('#/recipes') && link.getAttribute('href') === '#/recipes')) {
+                const href = link.getAttribute('href');
+                if (href === hash || (hash.startsWith('#/recipes') && href === '#/recipes')) {
                     link.classList.add('bg-white', 'shadow-xs', 'text-olive-900');
                     link.classList.remove('text-olive-800');
                 } else {
@@ -487,17 +532,15 @@
         }
 
         window.addEventListener('hashchange', router);
-        window.addEventListener('load', router);
+        window.addEventListener('DOMContentLoaded', router);
 
-        function toggleMobileMenu() {
-            const menu = document.getElementById('mobile-menu');
-            menu.classList.toggle('hidden');
-        }
+        window.toggleMobileMenu = function() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        };
 
-        // --- VIEW: HOME ---
+        // --- 5. VIEW: HOME ---
         function renderHome(container) {
             container.innerHTML = `
-                <!-- Hero Section -->
                 <section class="relative overflow-hidden pt-12 pb-20 md:py-24 bg-gradient-to-b from-olive-100/60 to-cream-50">
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-12 items-center">
                         <div class="space-y-6">
@@ -522,35 +565,31 @@
                             </div>
                         </div>
 
-                        <!-- Hero Mini Interactive Widget -->
+                        <!-- Interactive Mini Chat Card -->
                         <div class="bg-white p-6 sm:p-8 rounded-3xl border border-olive-200 shadow-xl shadow-olive-900/5 relative">
                             <div class="absolute -top-3 -right-3 bg-olive-700 text-white text-xs font-mono px-3 py-1 rounded-full shadow-sm">
                                 Live AI Assistant
                             </div>
-                            <div class="flex items-center gap-3 pb-4 border-b border-olive-100 mb-6">
+                            <div class="flex items-center gap-3 pb-4 border-b border-olive-100 mb-5">
                                 <div class="w-10 h-10 rounded-xl bg-olive-100 flex items-center justify-center text-olive-700">
                                     <i data-lucide="bot" class="w-6 h-6"></i>
                                 </div>
                                 <div>
                                     <h3 class="font-bold text-olive-900">Ask NourishAI</h3>
-                                    <p class="text-xs text-olive-600">Guided by nutrition notes & recipes</p>
+                                    <p class="text-xs text-olive-600">Try a quick question right here</p>
                                 </div>
                             </div>
-                            <div class="space-y-4 text-sm">
-                                <div class="bg-olive-50 p-4 rounded-2xl text-olive-800 border border-olive-100">
-                                    <p class="font-medium text-xs font-mono text-olive-600 mb-1">SAMPLE PROMPT:</p>
-                                    <p class="italic">"Can you suggest a quick dinner under $3 per serving that is low sodium for my blood pressure?"</p>
-                                </div>
-                                <div class="bg-white p-4 rounded-2xl border border-olive-200 shadow-xs space-y-2">
-                                    <div class="flex items-center gap-2 text-xs font-mono text-olive-700 font-bold">
-                                        <i data-lucide="check-circle-2" class="w-4 h-4 text-olive-600"></i>
-                                        <span>NourishAI Recommendation</span>
-                                    </div>
-                                    <p class="text-olive-700 text-xs leading-relaxed">Try the <a href="#/recipes/lentil-ginger-bowl" class="underline font-semibold text-olive-900">Ginger lentil power bowl</a>! It costs approx <span class="font-mono font-bold">${window.formatPrice(1.85)}</span>/serving, has 210mg sodium, and takes 40 minutes.</p>
+                            <div id="hero-chat-box" class="space-y-3 text-sm mb-4 max-h-52 overflow-y-auto">
+                                <div class="bg-olive-50 p-3.5 rounded-2xl text-olive-800 border border-olive-100 text-xs leading-relaxed">
+                                    Ask me for a budget dinner, low-sodium swap, or meal idea in <strong>${currentCurrency}</strong>!
                                 </div>
                             </div>
-                            <div class="mt-6 pt-4 border-t border-olive-100 flex justify-between items-center">
-                                <span class="text-xs text-olive-600 font-mono">Currencies updated live</span>
+                            <form onsubmit="handleHeroChat(event)" class="flex gap-2">
+                                <input type="text" id="hero-chat-input" placeholder="e.g., Cheap dinner for blood pressure?" class="flex-grow px-3.5 py-2.5 text-xs bg-olive-50/70 border border-olive-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-olive-600">
+                                <button type="submit" class="bg-olive-700 hover:bg-olive-800 text-white px-4 py-2.5 rounded-xl text-xs font-medium transition">Ask</button>
+                            </form>
+                            <div class="mt-4 pt-3 border-t border-olive-100 flex justify-between items-center">
+                                <span class="text-xs text-olive-600 font-mono">Currency: ${currentCurrency}</span>
                                 <a href="#/chat" class="text-xs font-bold text-olive-700 hover:text-olive-900 flex items-center gap-1">Open full chat <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></a>
                             </div>
                         </div>
@@ -561,7 +600,7 @@
                 <section class="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="text-center max-w-2xl mx-auto mb-12 space-y-3">
                         <h2 class="font-serif text-3xl font-bold text-olive-900">Built for real-life constraints</h2>
-                        <p class="text-olive-700">Weight goals, blood pressure, aging, mood, faith-based diets, allergies, tight budgets, and an empty fridge—pick a path and cook from there.</p>
+                        <p class="text-olive-700">Weight goals, blood pressure, aging, mood, faith-based diets, allergies, and tight budgets—pick a path and cook from there.</p>
                     </div>
 
                     <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -635,7 +674,23 @@
             `;
         }
 
-        // --- VIEW: RECIPES LIST ---
+        window.handleHeroChat = function(e) {
+            e.preventDefault();
+            const input = document.getElementById('hero-chat-input');
+            const box = document.getElementById('hero-chat-box');
+            const q = input.value.trim();
+            if (!q) return;
+
+            const reply = generateSmartReply(q).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            box.innerHTML += `
+                <div class="bg-olive-900 text-white p-3 rounded-2xl text-xs ml-8">${q}</div>
+                <div class="bg-white p-3.5 rounded-2xl border border-olive-200 text-xs text-olive-800 whitespace-pre-line leading-relaxed">${reply}</div>
+            `;
+            input.value = '';
+            box.scrollTop = box.scrollHeight;
+        };
+
+        // --- 6. VIEW: RECIPES LIST ---
         function renderRecipes(container) {
             container.innerHTML = `
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
@@ -645,24 +700,23 @@
                             <span>Curated Nutrition Recipes</span>
                         </div>
                         <h1 class="font-serif text-4xl font-bold text-olive-900">Healthy Recipes Library</h1>
-                        <p class="text-olive-700 max-w-2xl">Every recipe includes transparent cost estimates (in <span class="font-bold">${currentCurrency}</span>), macro breakdowns, and health goal tags.</p>
+                        <p class="text-olive-700 max-w-2xl">Every recipe includes transparent cost estimates in <span class="font-bold">${currentCurrency}</span>, macro breakdowns, and dietary tags.</p>
                     </div>
 
-                    <!-- Search & Filter Bar -->
                     <div class="flex flex-col sm:flex-row gap-4 items-center justify-between bg-white p-4 rounded-2xl border border-olive-200 shadow-xs">
                         <div class="relative w-full sm:w-96">
                             <i data-lucide="search" class="absolute left-3.5 top-3 w-4 h-4 text-olive-600"></i>
                             <input type="text" id="recipe-search" placeholder="Search by ingredient, name, or goal..." oninput="filterRecipes()" class="w-full pl-10 pr-4 py-2 text-sm bg-olive-50/50 border border-olive-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-olive-600">
                         </div>
                         <div class="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
-                            <button onclick="filterCategory('All')" class="filter-btn active text-xs font-mono font-medium px-3.5 py-2 rounded-xl bg-olive-700 text-white shrink-0">All Recipes</button>
-                            <button onclick="filterCategory('Weight management')" class="filter-btn text-xs font-mono font-medium px-3.5 py-2 rounded-xl bg-olive-100 text-olive-800 hover:bg-olive-200 shrink-0">Weight Loss</button>
-                            <button onclick="filterCategory('Blood pressure')" class="filter-btn text-xs font-mono font-medium px-3.5 py-2 rounded-xl bg-olive-100 text-olive-800 hover:bg-olive-200 shrink-0">Blood Pressure</button>
-                            <button onclick="filterCategory('Mood & mind')" class="filter-btn text-xs font-mono font-medium px-3.5 py-2 rounded-xl bg-olive-100 text-olive-800 hover:bg-olive-200 shrink-0">Mood & Mind</button>
+                            <button onclick="filterCategory('All', this)" class="filter-btn text-xs font-mono font-medium px-3.5 py-2 rounded-xl bg-olive-700 text-white shrink-0">All (${RECIPES.length})</button>
+                            <button onclick="filterCategory('Weight management', this)" class="filter-btn text-xs font-mono font-medium px-3.5 py-2 rounded-xl bg-olive-100 text-olive-800 hover:bg-olive-200 shrink-0">Weight Loss</button>
+                            <button onclick="filterCategory('Blood pressure', this)" class="filter-btn text-xs font-mono font-medium px-3.5 py-2 rounded-xl bg-olive-100 text-olive-800 hover:bg-olive-200 shrink-0">Blood Pressure</button>
+                            <button onclick="filterCategory('Blood sugar', this)" class="filter-btn text-xs font-mono font-medium px-3.5 py-2 rounded-xl bg-olive-100 text-olive-800 hover:bg-olive-200 shrink-0">Blood Sugar</button>
+                            <button onclick="filterCategory('Mood & mind', this)" class="filter-btn text-xs font-mono font-medium px-3.5 py-2 rounded-xl bg-olive-100 text-olive-800 hover:bg-olive-200 shrink-0">Mood & Mind</button>
                         </div>
                     </div>
 
-                    <!-- Recipes Grid -->
                     <div id="recipes-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
                         ${renderRecipeCards(RECIPES)}
                     </div>
@@ -702,29 +756,31 @@
 
         window.filterRecipes = function() {
             const query = document.getElementById('recipe-search').value.toLowerCase();
-            const filtered = RECIPES.filter(r => r.title.toLowerCase().includes(query) || r.subtitle.toLowerCase().includes(query) || r.category.toLowerCase().includes(query) || r.tags.some(t => t.toLowerCase().includes(query)));
+            const filtered = RECIPES.filter(r =>
+                r.title.toLowerCase().includes(query) ||
+                r.subtitle.toLowerCase().includes(query) ||
+                r.category.toLowerCase().includes(query) ||
+                r.tags.some(t => t.toLowerCase().includes(query))
+            );
             document.getElementById('recipes-grid').innerHTML = renderRecipeCards(filtered);
-            lucide.createIcons();
+            if (window.lucide) lucide.createIcons();
         };
 
-        window.filterCategory = function(cat) {
+        window.filterCategory = function(cat, btnEl) {
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.classList.remove('bg-olive-700', 'text-white');
                 btn.classList.add('bg-olive-100', 'text-olive-800');
             });
-            event.target.classList.add('bg-olive-700', 'text-white');
-            event.target.classList.remove('bg-olive-100', 'text-olive-800');
-
-            if (cat === 'All') {
-                document.getElementById('recipes-grid').innerHTML = renderRecipeCards(RECIPES);
-            } else {
-                const filtered = RECIPES.filter(r => r.category === cat || r.category2 === cat);
-                document.getElementById('recipes-grid').innerHTML = renderRecipeCards(filtered);
+            if (btnEl) {
+                btnEl.classList.add('bg-olive-700', 'text-white');
+                btnEl.classList.remove('bg-olive-100', 'text-olive-800');
             }
-            lucide.createIcons();
+            const filtered = cat === 'All' ? RECIPES : RECIPES.filter(r => r.category === cat || r.category2 === cat);
+            document.getElementById('recipes-grid').innerHTML = renderRecipeCards(filtered);
+            if (window.lucide) lucide.createIcons();
         };
 
-        // --- VIEW: RECIPE DETAIL ---
+        // --- 7. VIEW: RECIPE DETAIL ---
         function renderRecipeDetail(container, recipeId) {
             const recipe = RECIPES.find(r => r.id === recipeId) || RECIPES[0];
             container.innerHTML = `
@@ -740,11 +796,10 @@
                         <p class="text-lg text-olive-700">${recipe.subtitle}</p>
                     </div>
 
-                    <div class="rounded-3xl overflow-hidden h-96 border border-olive-200 shadow-md">
+                    <div class="rounded-3xl overflow-hidden h-80 sm:h-96 border border-olive-200 shadow-md">
                         <img src="${recipe.image}" alt="${recipe.title}" class="w-full h-full object-cover">
                     </div>
 
-                    <!-- Quick Stats Bar -->
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-white p-6 rounded-2xl border border-olive-200 shadow-xs">
                         <div class="space-y-1">
                             <span class="text-xs font-mono text-olive-600 uppercase">Prep Time</span>
@@ -764,7 +819,6 @@
                         </div>
                     </div>
 
-                    <!-- Nutrition & Ingredients Grid -->
                     <div class="grid md:grid-cols-2 gap-8">
                         <div class="bg-white p-8 rounded-3xl border border-olive-200 space-y-6">
                             <h3 class="font-serif text-2xl font-bold text-olive-900">Ingredients</h3>
@@ -777,10 +831,10 @@
                                 `).join('')}
                             </ul>
                             <div class="pt-6 border-t border-olive-100">
-                                <a href="#/chat" class="w-full bg-olive-100 hover:bg-olive-200 text-olive-900 text-sm font-medium py-3 rounded-xl flex items-center justify-center gap-2 transition">
+                                <button onclick="askAboutRecipe('${recipe.title.replace(/'/g, "\\'")}')" class="w-full bg-olive-100 hover:bg-olive-200 text-olive-900 text-sm font-medium py-3 rounded-xl flex items-center justify-center gap-2 transition">
                                     <i data-lucide="sparkles" class="w-4 h-4 text-olive-700"></i>
                                     <span>Ask AI how to adapt this recipe</span>
-                                </a>
+                                </button>
                             </div>
                         </div>
 
@@ -811,7 +865,6 @@
                         </div>
                     </div>
 
-                    <!-- Preparation Steps -->
                     <div class="bg-white p-8 rounded-3xl border border-olive-200 space-y-6">
                         <h3 class="font-serif text-2xl font-bold text-olive-900">Preparation Steps</h3>
                         <ol class="space-y-4">
@@ -827,62 +880,59 @@
             `;
         }
 
-        // --- VIEW: NUTRITION CHAT (Interactive Gemini API Chatbot) ---
+        window.askAboutRecipe = function(title) {
+            chatState.messages.push({ role: 'user', content: `How can I adapt "${title}" for my diet and budget?` });
+            chatState.messages.push({ role: 'assistant', content: generateSmartReply(`adapt ${title}`) });
+            window.location.hash = '#/chat';
+        };
+
+        // --- 8. VIEW: NUTRITION CHAT ---
         function renderChat(container) {
             container.innerHTML = `
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow flex flex-col w-full">
                     <div class="grid lg:grid-cols-4 gap-8 flex-grow">
-                        <!-- Sidebar Settings -->
                         <div class="lg:col-span-1 bg-white p-6 rounded-3xl border border-olive-200 space-y-6 h-fit">
                             <div>
-                                <h3 class="font-serif text-lg font-bold text-olive-900">Chat Settings</h3>
-                                <p class="text-xs text-olive-600 mt-1">Configure your personal goals to tailor the AI responses.</p>
+                                <h3 class="font-serif text-lg font-bold text-olive-900">Chat Preferences</h3>
+                                <p class="text-xs text-olive-600 mt-1">Configure your goals to tailor responses.</p>
                             </div>
 
                             <div class="space-y-4 text-sm">
                                 <div class="space-y-1.5">
                                     <label class="text-xs font-mono text-olive-700 font-bold uppercase">Health Goal</label>
-                                    <select id="chat-goal" onchange="chatState.goal = this.value" class="w-full text-sm bg-olive-50 border border-olive-200 rounded-xl p-2.5 text-olive-900 font-medium">
+                                    <select id="chat-goal" onchange="chatState.goal = this.value; router();" class="w-full text-sm bg-olive-50 border border-olive-200 rounded-xl p-2.5 text-olive-900 font-medium">
                                         <option ${chatState.goal === 'Weight management' ? 'selected' : ''}>Weight management</option>
-                                        <option ${chatState.goal === 'Blood pressure' ? 'selected' : ''}>Blood pressure (DASH)</option>
-                                        <option ${chatState.goal === 'Blood sugar' ? 'selected' : ''}>Blood sugar & Diabetes</option>
+                                        <option ${chatState.goal === 'Blood pressure (DASH)' ? 'selected' : ''}>Blood pressure (DASH)</option>
+                                        <option ${chatState.goal === 'Blood sugar & Diabetes' ? 'selected' : ''}>Blood sugar & Diabetes</option>
                                         <option ${chatState.goal === 'Heart health' ? 'selected' : ''}>Heart health</option>
-                                        <option ${chatState.goal === 'Mood & mind' ? 'selected' : ''}>Mood & Mind</option>
+                                        <option ${chatState.goal === 'Mood & Mind' ? 'selected' : ''}>Mood & Mind</option>
                                     </select>
                                 </div>
 
                                 <div class="space-y-1.5">
                                     <label class="text-xs font-mono text-olive-700 font-bold uppercase">Dietary & Culture</label>
-                                    <select id="chat-diet" onchange="chatState.diet = this.value" class="w-full text-sm bg-olive-50 border border-olive-200 rounded-xl p-2.5 text-olive-900 font-medium">
+                                    <select id="chat-diet" onchange="chatState.diet = this.value; router();" class="w-full text-sm bg-olive-50 border border-olive-200 rounded-xl p-2.5 text-olive-900 font-medium">
                                         <option ${chatState.diet === 'None / Omnivore' ? 'selected' : ''}>None / Omnivore</option>
                                         <option ${chatState.diet === 'Halal' ? 'selected' : ''}>Halal</option>
                                         <option ${chatState.diet === 'Vegetarian' ? 'selected' : ''}>Vegetarian</option>
                                         <option ${chatState.diet === 'Vegan' ? 'selected' : ''}>Vegan</option>
                                         <option ${chatState.diet === 'Gluten-Free' ? 'selected' : ''}>Gluten-Free</option>
                                         <option ${chatState.diet === 'East Asian' ? 'selected' : ''}>East Asian</option>
-                                        <option ${chatState.diet === 'South Asian' ? 'selected' : ''}>South Asian</option>
-                                        <option ${chatState.diet === 'Mediterranean' ? 'selected' : ''}>Mediterranean</option>
                                     </select>
                                 </div>
 
                                 <div class="space-y-1.5">
-                                    <label class="text-xs font-mono text-olive-700 font-bold uppercase">Budget per Meal</label>
-                                    <select id="chat-budget" onchange="chatState.budget = this.value" class="w-full text-sm bg-olive-50 border border-olive-200 rounded-xl p-2.5 text-olive-900 font-medium">
-                                        <option ${chatState.budget.includes('Low') ? 'selected' : ''}>Low (&lt; $3/meal)</option>
-                                        <option ${chatState.budget.includes('Medium') ? 'selected' : ''}>Medium ($3-$6/meal)</option>
-                                        <option ${chatState.budget.includes('Flexible') ? 'selected' : ''}>Flexible / Any</option>
-                                    </select>
+                                    <label class="text-xs font-mono text-olive-700 font-bold uppercase">Quick Prompts</label>
+                                    <div class="flex flex-col gap-2 pt-1">
+                                        <button type="button" onclick="sendQuickPrompt('Suggest an affordable meal under budget')" class="text-left text-xs bg-olive-50 hover:bg-olive-100 text-olive-800 p-2.5 rounded-xl border border-olive-200/70 transition">💰 Budget-friendly meal</button>
+                                        <button type="button" onclick="sendQuickPrompt('Low sodium ideas for blood pressure')" class="text-left text-xs bg-olive-50 hover:bg-olive-100 text-olive-800 p-2.5 rounded-xl border border-olive-200/70 transition">❤️ Low-sodium blood pressure</button>
+                                        <button type="button" onclick="sendQuickPrompt('Steady blood sugar meal swaps')" class="text-left text-xs bg-olive-50 hover:bg-olive-100 text-olive-800 p-2.5 rounded-xl border border-olive-200/70 transition">🌾 Blood sugar balance</button>
+                                    </div>
                                 </div>
-                            </div>
-
-                            <div class="p-4 bg-olive-50 rounded-2xl border border-olive-100 text-xs text-olive-700 space-y-2">
-                                <p class="font-bold text-olive-900 font-mono">💡 Pro Tip</p>
-                                <p>Ask about specific ingredients in your fridge or request meal swaps for your cultural palate!</p>
                             </div>
                         </div>
 
-                        <!-- Chat Box -->
-                        <div class="lg:col-span-3 bg-white rounded-3xl border border-olive-200 flex flex-col h-[700px] shadow-sm">
+                        <div class="lg:col-span-3 bg-white rounded-3xl border border-olive-200 flex flex-col h-[650px] shadow-sm">
                             <div class="p-6 border-b border-olive-100 flex items-center justify-between">
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 rounded-xl bg-olive-700 text-white flex items-center justify-center">
@@ -890,13 +940,12 @@
                                     </div>
                                     <div>
                                         <h3 class="font-serif font-bold text-olive-900">NourishAI Guide</h3>
-                                        <p class="text-xs text-olive-600 font-mono">Active Goal: <span class="font-bold text-olive-800">${chatState.goal}</span> | Currency: <span class="font-bold text-olive-800">${currentCurrency}</span></p>
+                                        <p class="text-xs text-olive-600 font-mono">Goal: <span class="font-bold text-olive-800">${chatState.goal}</span> • Diet: <span class="font-bold text-olive-800">${chatState.diet}</span></p>
                                     </div>
                                 </div>
                                 <button onclick="clearChat()" class="text-xs font-mono text-olive-600 hover:text-olive-900 underline">Clear Chat</button>
                             </div>
 
-                            <!-- Messages Area -->
                             <div id="chat-messages" class="flex-grow p-6 overflow-y-auto space-y-6">
                                 ${chatState.messages.map(msg => `
                                     <div class="flex items-start gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}">
@@ -904,16 +953,15 @@
                                             <i data-lucide="${msg.role === 'user' ? 'user' : 'bot'}" class="w-4 h-4"></i>
                                         </div>
                                         <div class="max-w-xl p-4 rounded-2xl text-sm ${msg.role === 'user' ? 'bg-olive-900 text-white rounded-tr-none' : 'bg-olive-50 text-olive-900 border border-olive-200 rounded-tl-none'}">
-                                            <p class="whitespace-pre-wrap leading-relaxed">${msg.content}</p>
+                                            <div class="whitespace-pre-line leading-relaxed">${msg.content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</div>
                                         </div>
                                     </div>
                                 `).join('')}
                             </div>
 
-                            <!-- Input Area -->
                             <div class="p-4 border-t border-olive-100 bg-cream-50/50 rounded-b-3xl">
                                 <form onsubmit="handleChatSubmit(event)" class="flex gap-2">
-                                    <input type="text" id="chat-input" placeholder="Ask anything about nutrition, recipes, or meal swaps..." class="flex-grow px-4 py-3 text-sm bg-white border border-olive-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-olive-600">
+                                    <input type="text" id="chat-input" placeholder="Ask about nutrition, recipes, or meal swaps..." class="flex-grow px-4 py-3 text-sm bg-white border border-olive-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-olive-600">
                                     <button type="submit" class="bg-olive-700 hover:bg-olive-800 text-white px-6 py-3 rounded-xl font-medium text-sm flex items-center gap-2 shadow-sm transition shrink-0">
                                         <span>Send</span>
                                         <i data-lucide="send" class="w-4 h-4"></i>
@@ -925,17 +973,25 @@
                 </div>
             `;
             const msgContainer = document.getElementById('chat-messages');
-            msgContainer.scrollTop = msgContainer.scrollHeight;
+            if (msgContainer) msgContainer.scrollTop = msgContainer.scrollHeight;
         }
 
         window.clearChat = function() {
             chatState.messages = [
-                { role: 'assistant', content: 'Chat history cleared. How can I help you today?' }
+                { role: 'assistant', content: 'Chat cleared. How can I help you plan your next meal?' }
             ];
             renderChat(document.getElementById('app'));
+            if (window.lucide) lucide.createIcons();
         };
 
-        window.handleChatSubmit = async function(e) {
+        window.sendQuickPrompt = function(text) {
+            chatState.messages.push({ role: 'user', content: text });
+            chatState.messages.push({ role: 'assistant', content: generateSmartReply(text) });
+            renderChat(document.getElementById('app'));
+            if (window.lucide) lucide.createIcons();
+        };
+
+        window.handleChatSubmit = function(e) {
             e.preventDefault();
             const inputEl = document.getElementById('chat-input');
             const text = inputEl.value.trim();
@@ -943,57 +999,28 @@
 
             chatState.messages.push({ role: 'user', content: text });
             inputEl.value = '';
+            chatState.messages.push({ role: 'assistant', content: generateSmartReply(text) });
             renderChat(document.getElementById('app'));
-
-            const msgContainer = document.getElementById('chat-messages');
-            msgContainer.scrollTop = msgContainer.scrollHeight;
-
-            // Add typing indicator
-            const typingId = 'typing-' + Date.now();
-            chatState.messages.push({ role: 'assistant', content: 'Thinking...', id: typingId });
-            renderChat(document.getElementById('app'));
-            msgContainer.scrollTop = msgContainer.scrollHeight;
-
-            // Simulated AI Intelligent Response grounded in NourishAI recipes
-            setTimeout(() => {
-                chatState.messages = chatState.messages.filter(m => m.id !== typingId);
-                
-                let reply = `Based on your goal of **${chatState.goal}** and **${chatState.diet}** preference, here is my recommendation:\n\n`;
-                const queryLower = text.toLowerCase();
-                
-                if (queryLower.includes('blood pressure') || queryLower.includes('dash') || queryLower.includes('sodium')) {
-                    reply += `For blood pressure management, aiming for lower sodium (<400mg per meal) and high potassium is key. I recommend checking out our **Ginger lentil power bowl** (${window.formatPrice(1.85)}/serving, 680mg potassium) or our **Provençal rosemary chickpea stew**.\n\nWould you like the full ingredient list for either?`;
-                } else if (queryLower.includes('cheap') || queryLower.includes('budget') || queryLower.includes('cost') || queryLower.includes('affordable')) {
-                    reply += `On a ${chatState.budget} budget, lentils, beans, oats, and seasonal greens are your best friends. Our **Ginger lentil power bowl** costs only **${window.formatPrice(1.85)}** per serving and provides 18g of plant protein!`;
-                } else if (queryLower.includes('sweet') || queryLower.includes('breakfast') || queryLower.includes('oat')) {
-                    reply += `For a healthy no-cook breakfast, try the **Overnight oat & berry jar** (${window.formatPrice(2.10)}/serving). It features oats, Greek yogurt, chia seeds, and berries for steady energy and stable mood.`;
-                } else {
-                    reply += `That is a wonderful question! To support your **${chatState.goal}**, focus on whole foods, adequate fiber, and balanced macronutrients. You can explore our curated recipes under the Recipes tab or check out our meal planner to build a full daily schedule!`;
-                }
-
-                chatState.messages.push({ role: 'assistant', content: reply });
-                renderChat(document.getElementById('app'));
-                msgContainer.scrollTop = msgContainer.scrollHeight;
-            }, 1000);
+            if (window.lucide) lucide.createIcons();
         };
 
-        // --- VIEW: FOOD CHECK / ANALYZE ---
+        // --- 9. VIEW: FOOD CHECK ---
         function renderAnalyze(container) {
             container.innerHTML = `
                 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
                     <div class="space-y-3">
                         <div class="inline-flex items-center gap-2 bg-olive-100 px-3 py-1 rounded-full text-xs font-mono font-medium text-olive-700">
                             <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
-                            <span>Food Nutrient & Allergen Evaluator</span>
+                            <span>Food Nutrient & Swap Evaluator</span>
                         </div>
                         <h1 class="font-serif text-4xl font-bold text-olive-900">Food Check & Analysis</h1>
-                        <p class="text-olive-700">Paste ingredients or describe a meal to check its alignment with your health goals and dietary restrictions.</p>
+                        <p class="text-olive-700">Describe a dish or paste ingredients to check nutritional balance and get healthier swaps.</p>
                     </div>
 
                     <div class="bg-white p-8 rounded-3xl border border-olive-200 shadow-sm space-y-6">
                         <div class="space-y-2">
-                            <label class="text-xs font-mono font-bold text-olive-700 uppercase">Describe your meal or paste ingredient label</label>
-                            <textarea id="analyze-input" rows="4" placeholder="e.g., Creamy pasta with heavy cream, parmesan cheese, bacon, and white flour pasta..." class="w-full p-4 text-sm bg-olive-50/50 border border-olive-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-olive-600"></textarea>
+                            <label class="text-xs font-mono font-bold text-olive-700 uppercase">Describe your meal or paste ingredients</label>
+                            <textarea id="analyze-input" rows="4" placeholder="e.g., Fried instant noodles with luncheon meat and sweet milk tea..." class="w-full p-4 text-sm bg-olive-50/50 border border-olive-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-olive-600"></textarea>
                         </div>
                         <button onclick="runFoodAnalysis()" class="w-full bg-olive-700 hover:bg-olive-800 text-white font-medium py-3.5 rounded-xl shadow-sm transition flex items-center justify-center gap-2">
                             <i data-lucide="sparkles" class="w-4 h-4"></i>
@@ -1001,46 +1028,65 @@
                         </button>
                     </div>
 
-                    <div id="analyze-results" class="hidden bg-white p-8 rounded-3xl border border-olive-200 shadow-sm space-y-6">
-                        <h3 class="font-serif text-2xl font-bold text-olive-900">Evaluation Report</h3>
-                        <div class="grid sm:grid-cols-3 gap-4">
-                            <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200">
-                                <span class="text-xs font-mono text-amber-800 uppercase font-bold">Estimated Calories</span>
-                                <p class="text-xl font-bold text-amber-900 mt-1">~650 kcal</p>
-                            </div>
-                            <div class="bg-red-50 p-4 rounded-2xl border border-red-200">
-                                <span class="text-xs font-mono text-red-800 uppercase font-bold">Saturated Fat / Sodium</span>
-                                <p class="text-xl font-bold text-red-900 mt-1">High (820mg sodium)</p>
-                            </div>
-                            <div class="bg-olive-50 p-4 rounded-2xl border border-olive-100">
-                                <span class="text-xs font-mono text-olive-700 uppercase font-bold">Health Fit Score</span>
-                                <p class="text-xl font-bold text-olive-900 mt-1">5.2 / 10</p>
-                            </div>
-                        </div>
-                        <div class="space-y-3 pt-4 border-t border-olive-100">
-                            <h4 class="font-bold text-olive-900 text-sm">Smarter Culturally Aware Swaps:</h4>
-                            <ul class="space-y-2 text-sm text-olive-700">
-                                <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-olive-600 mt-0.5"></i> Substitute heavy cream with cashew cream or low-fat Greek yogurt to cut saturated fat by 60%.</li>
-                                <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-olive-600 mt-0.5"></i> Use whole-grain or buckwheat soba noodles to double dietary fiber.</li>
-                            </ul>
-                        </div>
-                    </div>
+                    <div id="analyze-results" class="hidden bg-white p-8 rounded-3xl border border-olive-200 shadow-sm space-y-6"></div>
                 </div>
             `;
         }
 
         window.runFoodAnalysis = function() {
             const val = document.getElementById('analyze-input').value.trim();
-            if (!val) {
-                alert('Please enter a meal description or ingredient list first.');
-                return;
-            }
-            document.getElementById('analyze-results').classList.remove('hidden');
-            document.getElementById('analyze-results').scrollIntoView({ behavior: 'smooth' });
-            lucide.createIcons();
+            if (!val) return;
+            const lower = val.toLowerCase();
+            const isHealthy = lower.includes('salad') || lower.includes('steamed') || lower.includes('lentil') || lower.includes('oat') || lower.includes('salmon') || lower.includes('tofu');
+
+            const resultsEl = document.getElementById('analyze-results');
+            resultsEl.innerHTML = isHealthy ? `
+                <h3 class="font-serif text-2xl font-bold text-olive-900">Evaluation Report: Great Choice</h3>
+                <div class="grid sm:grid-cols-3 gap-4">
+                    <div class="bg-olive-50 p-4 rounded-2xl border border-olive-200">
+                        <span class="text-xs font-mono text-olive-700 uppercase font-bold">Nutrient Density</span>
+                        <p class="text-xl font-bold text-olive-900 mt-1">High</p>
+                    </div>
+                    <div class="bg-olive-50 p-4 rounded-2xl border border-olive-200">
+                        <span class="text-xs font-mono text-olive-700 uppercase font-bold">Sodium Load</span>
+                        <p class="text-xl font-bold text-olive-900 mt-1">Low – Moderate</p>
+                    </div>
+                    <div class="bg-olive-50 p-4 rounded-2xl border border-olive-200">
+                        <span class="text-xs font-mono text-olive-700 uppercase font-bold">Health Fit Score</span>
+                        <p class="text-xl font-bold text-olive-900 mt-1">8.8 / 10</p>
+                    </div>
+                </div>
+                <p class="text-sm text-olive-700">This meal features whole ingredients rich in fiber, lean protein, or unsaturated fats. Pair it with a glass of water or unsweetened tea to keep added sugars near zero.</p>
+            ` : `
+                <h3 class="font-serif text-2xl font-bold text-olive-900">Evaluation Report: Room for Easy Swaps</h3>
+                <div class="grid sm:grid-cols-3 gap-4">
+                    <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200">
+                        <span class="text-xs font-mono text-amber-800 uppercase font-bold">Estimated Energy</span>
+                        <p class="text-xl font-bold text-amber-900 mt-1">~680 kcal</p>
+                    </div>
+                    <div class="bg-red-50 p-4 rounded-2xl border border-red-200">
+                        <span class="text-xs font-mono text-red-800 uppercase font-bold">Sodium / Sat. Fat</span>
+                        <p class="text-xl font-bold text-red-900 mt-1">Elevated (~900mg)</p>
+                    </div>
+                    <div class="bg-olive-50 p-4 rounded-2xl border border-olive-100">
+                        <span class="text-xs font-mono text-olive-700 uppercase font-bold">Health Fit Score</span>
+                        <p class="text-xl font-bold text-olive-900 mt-1">5.0 / 10</p>
+                    </div>
+                </div>
+                <div class="space-y-2 pt-4 border-t border-olive-100 text-sm text-olive-700">
+                    <p class="font-bold text-olive-900">Practical Swaps:</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li>Switch deep-fried or creamy bases to steamed, boiled, or air-fried preparations.</li>
+                        <li>Add a side of leafy greens (bok choy, spinach, or broccoli) to boost potassium and fiber.</li>
+                        <li>Swap sugary drinks for unsweetened green tea or lemon water.</li>
+                    </ul>
+                </div>
+            `;
+            resultsEl.classList.remove('hidden');
+            resultsEl.scrollIntoView({ behavior: 'smooth' });
         };
 
-        // --- VIEW: MEAL PLANNER ---
+        // --- 10. VIEW: MEAL PLANNER ---
         function renderPlanner(container) {
             container.innerHTML = `
                 <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
@@ -1050,16 +1096,17 @@
                             <span>Budget & Goal Meal Planning</span>
                         </div>
                         <h1 class="font-serif text-4xl font-bold text-olive-900">Custom Meal Planner</h1>
-                        <p class="text-olive-700">Generate a balanced daily or weekly outline that respects your budget, allergies, and health goals.</p>
+                        <p class="text-olive-700">Generate a balanced daily outline in <span class="font-bold">${currentCurrency}</span> tailored to your goal.</p>
                     </div>
 
                     <div class="bg-white p-6 sm:p-8 rounded-3xl border border-olive-200 shadow-sm grid sm:grid-cols-3 gap-6">
                         <div>
-                            <label class="text-xs font-mono font-bold text-olive-700 uppercase block mb-2">Duration</label>
-                            <select id="planner-days" class="w-full text-sm bg-olive-50 border border-olive-200 rounded-xl p-3 text-olive-900 font-medium">
-                                <option>1 Day Plan</option>
-                                <option>3 Day Plan</option>
-                                <option>7 Day Plan</option>
+                            <label class="text-xs font-mono font-bold text-olive-700 uppercase block mb-2">Dietary Filter</label>
+                            <select id="planner-diet" class="w-full text-sm bg-olive-50 border border-olive-200 rounded-xl p-3 text-olive-900 font-medium">
+                                <option value="All">All Meals</option>
+                                <option value="Vegan">Vegan</option>
+                                <option value="Halal">Halal</option>
+                                <option value="Gluten-Free">Gluten-Free</option>
                             </select>
                         </div>
                         <div>
@@ -1067,69 +1114,64 @@
                             <select id="planner-goal" class="w-full text-sm bg-olive-50 border border-olive-200 rounded-xl p-3 text-olive-900 font-medium">
                                 <option>Weight Management</option>
                                 <option>Blood Pressure (DASH)</option>
-                                <option>Heart Health & Omega-3</option>
+                                <option>Blood Sugar Balance</option>
                             </select>
                         </div>
                         <div class="flex items-end">
                             <button onclick="generateMealPlan()" class="w-full bg-olive-700 hover:bg-olive-800 text-white font-medium py-3 rounded-xl shadow-sm transition flex items-center justify-center gap-2">
-                                <i data-lucide="sparkles" class="w-4 h-4"></i>
-                                <span>Generate Plan</span>
+                                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                                <span>Shuffle Plan</span>
                             </button>
                         </div>
                     </div>
 
-                    <div id="planner-output" class="space-y-6">
-                        <div class="bg-white p-8 rounded-3xl border border-olive-200 shadow-sm space-y-6">
-                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-6 border-b border-olive-100 gap-4">
-                                <div>
-                                    <h3 class="font-serif text-2xl font-bold text-olive-900">Your Generated 1-Day Meal Outline</h3>
-                                    <p class="text-xs font-mono text-olive-600 mt-1">Estimated Total Cost: <span class="font-bold text-olive-900">${window.formatPrice(6.80)}</span> | Total Calories: ~1,010 kcal</p>
-                                </div>
-                                <span class="bg-olive-100 text-olive-800 text-xs font-mono font-bold px-3 py-1.5 rounded-full">DASH & Weight Friendly</span>
-                            </div>
-
-                            <div class="grid md:grid-cols-3 gap-6">
-                                <div class="bg-olive-50/50 p-6 rounded-2xl border border-olive-100 space-y-3">
-                                    <span class="text-xs font-mono font-bold text-olive-700 uppercase">Breakfast</span>
-                                    <h4 class="font-serif font-bold text-lg text-olive-900"><a href="#/recipes/oat-berry-breakfast" class="hover:underline">Overnight oat & berry jar</a></h4>
-                                    <p class="text-xs text-olive-700">No-cook oats with yogurt and berries.</p>
-                                    <div class="pt-3 border-t border-olive-200/60 flex justify-between text-xs font-mono text-olive-600">
-                                        <span>310 kcal</span>
-                                        <span class="font-bold text-olive-900">${window.formatPrice(2.10)}</span>
-                                    </div>
-                                </div>
-
-                                <div class="bg-olive-50/50 p-6 rounded-2xl border border-olive-100 space-y-3">
-                                    <span class="text-xs font-mono font-bold text-olive-700 uppercase">Lunch</span>
-                                    <h4 class="font-serif font-bold text-lg text-olive-900"><a href="#/recipes/lentil-ginger-bowl" class="hover:underline">Ginger lentil power bowl</a></h4>
-                                    <p class="text-xs text-olive-700">Warm red lentils with turmeric and spinach.</p>
-                                    <div class="pt-3 border-t border-olive-200/60 flex justify-between text-xs font-mono text-olive-600">
-                                        <span>320 kcal</span>
-                                        <span class="font-bold text-olive-900">${window.formatPrice(1.85)}</span>
-                                    </div>
-                                </div>
-
-                                <div class="bg-olive-50/50 p-6 rounded-2xl border border-olive-100 space-y-3">
-                                    <span class="text-xs font-mono font-bold text-olive-700 uppercase">Dinner</span>
-                                    <h4 class="font-serif font-bold text-lg text-olive-900"><a href="#/recipes/salmon-greens" class="hover:underline">Lemon herb baked salmon</a></h4>
-                                    <p class="text-xs text-olive-700">Omega-3 rich salmon with garlicky greens.</p>
-                                    <div class="pt-3 border-t border-olive-200/60 flex justify-between text-xs font-mono text-olive-600">
-                                        <span>420 kcal</span>
-                                        <span class="font-bold text-olive-900">${window.formatPrice(6.50)}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <div id="planner-output"></div>
                 </div>
             `;
+            generateMealPlan();
         }
 
         window.generateMealPlan = function() {
-            alert('Meal plan updated successfully based on your selected goals and currency!');
+            const diet = document.getElementById('planner-diet')?.value || 'All';
+            const goal = document.getElementById('planner-goal')?.value || 'Weight Management';
+            let pool = diet === 'All' ? RECIPES : RECIPES.filter(r => r.tags.some(t => t.includes(diet)));
+            if (pool.length < 3) pool = RECIPES;
+
+            const shuffled = [...pool].sort(() => 0.5 - Math.random()).slice(0, 3);
+            const totalCost = shuffled.reduce((sum, r) => sum + r.costUSD, 0);
+            const totalCal = shuffled.reduce((sum, r) => sum + r.calories, 0);
+            const labels = ['Breakfast', 'Lunch', 'Dinner'];
+
+            document.getElementById('planner-output').innerHTML = `
+                <div class="bg-white p-8 rounded-3xl border border-olive-200 shadow-sm space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-6 border-b border-olive-100 gap-4">
+                        <div>
+                            <h3 class="font-serif text-2xl font-bold text-olive-900">Your Daily Meal Outline</h3>
+                            <p class="text-xs font-mono text-olive-600 mt-1">Estimated Total Cost: <span class="font-bold text-olive-900">${window.formatPrice(totalCost)}</span> | Total Energy: ~${totalCal} kcal</p>
+                        </div>
+                        <span class="bg-olive-100 text-olive-800 text-xs font-mono font-bold px-3 py-1.5 rounded-full">${goal}</span>
+                    </div>
+
+                    <div class="grid md:grid-cols-3 gap-6">
+                        ${shuffled.map((meal, i) => `
+                            <div class="bg-olive-50/50 p-6 rounded-2xl border border-olive-100 space-y-3 flex flex-col justify-between">
+                                <div class="space-y-2">
+                                    <span class="text-xs font-mono font-bold text-olive-700 uppercase">${labels[i]}</span>
+                                    <h4 class="font-serif font-bold text-lg text-olive-900"><a href="#/recipes/${meal.id}" class="hover:underline">${meal.title}</a></h4>
+                                    <p class="text-xs text-olive-700">${meal.subtitle}</p>
+                                </div>
+                                <div class="pt-3 border-t border-olive-200/60 flex justify-between text-xs font-mono text-olive-600">
+                                    <span>${meal.calories} kcal • ${meal.protein}</span>
+                                    <span class="font-bold text-olive-900">${window.formatPrice(meal.costUSD)}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
         };
 
-        // --- VIEW: BMI & BODY CALCULATOR ---
+        // --- 11. VIEW: BMI & BODY CALCULATOR ---
         function renderBmi(container) {
             container.innerHTML = `
                 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
@@ -1139,7 +1181,7 @@
                             <span>Body Composition & Energy Calculator</span>
                         </div>
                         <h1 class="font-serif text-4xl font-bold text-olive-900">BMI & Body Check</h1>
-                        <p class="text-olive-700">Calculate your Body Mass Index with context for standard WHO thresholds and Asian-Pacific criteria.</p>
+                        <p class="text-olive-700">Calculate your Body Mass Index with context for both WHO Standard and Asia-Pacific thresholds.</p>
                     </div>
 
                     <div class="grid md:grid-cols-2 gap-8">
@@ -1148,64 +1190,65 @@
                             <div class="space-y-4">
                                 <div>
                                     <label class="text-xs font-mono font-bold text-olive-700 uppercase block mb-2">Weight (kg)</label>
-                                    <input type="number" id="bmi-weight" value="70" class="w-full p-3 text-sm bg-olive-50 border border-olive-200 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-olive-600">
+                                    <input type="number" id="bmi-weight" value="65" oninput="calculateBmi()" class="w-full p-3 text-sm bg-olive-50 border border-olive-200 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-olive-600">
                                 </div>
                                 <div>
                                     <label class="text-xs font-mono font-bold text-olive-700 uppercase block mb-2">Height (cm)</label>
-                                    <input type="number" id="bmi-height" value="175" class="w-full p-3 text-sm bg-olive-50 border border-olive-200 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-olive-600">
+                                    <input type="number" id="bmi-height" value="170" oninput="calculateBmi()" class="w-full p-3 text-sm bg-olive-50 border border-olive-200 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-olive-600">
                                 </div>
                                 <div>
-                                    <label class="text-xs font-mono font-bold text-olive-700 uppercase block mb-2">Activity Level</label>
-                                    <select id="bmi-activity" class="w-full p-3 text-sm bg-olive-50 border border-olive-200 rounded-xl font-medium">
-                                        <option>Sedentary (little or no exercise)</option>
-                                        <option>Moderate (exercise 3-5 days/wk)</option>
-                                        <option>Active (hard exercise 6-7 days/wk)</option>
+                                    <label class="text-xs font-mono font-bold text-olive-700 uppercase block mb-2">Reference Threshold</label>
+                                    <select id="bmi-standard" onchange="calculateBmi()" class="w-full p-3 text-sm bg-olive-50 border border-olive-200 rounded-xl font-medium">
+                                        <option value="asia">Asia-Pacific (18.5 – 22.9 normal)</option>
+                                        <option value="who">WHO Global Standard (18.5 – 24.9 normal)</option>
                                     </select>
                                 </div>
                             </div>
-                            <button onclick="calculateBmi()" class="w-full bg-olive-700 hover:bg-olive-800 text-white font-medium py-3.5 rounded-xl shadow-sm transition">
-                                Calculate BMI & Targets
-                            </button>
                         </div>
 
-                        <div id="bmi-result-card" class="bg-white p-8 rounded-3xl border border-olive-200 shadow-sm flex flex-col justify-between space-y-6">
+                        <div class="bg-white p-8 rounded-3xl border border-olive-200 shadow-sm flex flex-col justify-between space-y-6">
                             <div>
                                 <span class="text-xs font-mono font-bold text-olive-600 uppercase">Your Results</span>
-                                <h3 class="font-serif text-3xl font-bold text-olive-900 mt-2" id="bmi-val">22.9</h3>
+                                <h3 class="font-serif text-4xl font-bold text-olive-900 mt-2" id="bmi-val">22.5</h3>
                                 <p class="text-sm font-medium text-olive-700 mt-1" id="bmi-status">Normal weight range</p>
                             </div>
 
                             <div class="space-y-4 pt-6 border-t border-olive-100">
                                 <div class="flex justify-between text-sm">
                                     <span class="text-olive-600">Estimated Daily Maintenance</span>
-                                    <span class="font-bold text-olive-900 font-mono" id="bmi-cal">~2,150 kcal</span>
+                                    <span class="font-bold text-olive-900 font-mono" id="bmi-cal">~2,015 kcal</span>
                                 </div>
                                 <div class="flex justify-between text-sm">
                                     <span class="text-olive-600">Recommended Daily Protein</span>
-                                    <span class="font-bold text-olive-900 font-mono" id="bmi-protein">~84g</span>
+                                    <span class="font-bold text-olive-900 font-mono" id="bmi-protein">~78g</span>
                                 </div>
                             </div>
 
                             <div class="p-4 bg-olive-50 rounded-2xl border border-olive-100 text-xs text-olive-700">
-                                <p class="font-bold text-olive-900 font-mono mb-1">📋 Culturally Aware Note</p>
-                                <p>BMI is a general screening tool. Consideration is also given to waist circumference and cultural body composition factors.</p>
+                                <p class="font-bold text-olive-900 font-mono mb-1">Culturally Aware Note</p>
+                                <p>BMI is a general screening metric and does not distinguish muscle mass from body fat. Always interpret alongside waist circumference and energy levels.</p>
                             </div>
                         </div>
                     </div>
                 </div>
             `;
+            calculateBmi();
         }
 
         window.calculateBmi = function() {
-            const w = parseFloat(document.getElementById('bmi-weight').value);
-            const h = parseFloat(document.getElementById('bmi-height').value) / 100;
+            const w = parseFloat(document.getElementById('bmi-weight')?.value);
+            const h = parseFloat(document.getElementById('bmi-height')?.value) / 100;
+            const std = document.getElementById('bmi-standard')?.value || 'asia';
             if (!w || !h || h <= 0) return;
-            const bmi = (w / (h * h)).toFixed(1);
-            document.getElementById('bmi-val').innerText = bmi;
-            
+
+            const bmi = (w / (h * h));
+            document.getElementById('bmi-val').innerText = bmi.toFixed(1);
+
+            const upperNormal = std === 'asia' ? 23.0 : 25.0;
             let status = 'Normal weight range';
             if (bmi < 18.5) status = 'Underweight range';
-            else if (bmi >= 25) status = 'Overweight range';
+            else if (bmi >= upperNormal) status = 'Above standard normal range';
+
             document.getElementById('bmi-status').innerText = status;
             document.getElementById('bmi-cal').innerText = `~${Math.round(w * 31)} kcal`;
             document.getElementById('bmi-protein').innerText = `~${Math.round(w * 1.2)}g`;
