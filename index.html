@@ -42,6 +42,13 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .font-serif { font-family: 'Fraunces', Georgia, serif; }
         .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .typing-dot { animation: typingBounce 1.4s infinite ease-in-out both; }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typingBounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
     </style>
 </head>
 <body class="bg-cream-50 text-olive-900 h-full flex flex-col selection:bg-olive-200 selection:text-olive-900">
@@ -433,60 +440,140 @@
             }
         ];
 
-        // --- 3. CHATBOT STATE & LOGIC ---
+        // --- 3. INTERACTIVE AI CHAT ENGINE (LIVE GEMINI API + SMART FALLBACK) ---
         let chatState = {
             goal: 'Weight management',
             diet: 'None / Omnivore',
-            budget: 'Low (< $3/meal)',
+            apiKey: localStorage.getItem('nourish_gemini_key') || '',
+            isTyping: false,
             messages: [
-                { role: 'assistant', content: 'Hello! I am your NourishAI nutrition guide. Tell me what ingredients you have, your health goal, or your budget, and I will suggest practical meals and swaps.' }
+                { role: 'assistant', content: 'Hello! I am your NourishAI nutrition guide. Tell me what ingredients you have in your kitchen, your health goal, or your budget, and I will build practical meals and healthy swaps for you!' }
             ]
         };
 
-        function generateSmartReply(userText) {
+        window.saveApiKey = function(key) {
+            chatState.apiKey = key.trim();
+            localStorage.setItem('nourish_gemini_key', chatState.apiKey);
+            const badge = document.getElementById('ai-mode-badge');
+            if (badge) {
+                badge.innerText = chatState.apiKey ? 'Live Gemini AI Connected' : 'Built-In Smart Guide';
+                badge.className = chatState.apiKey
+                    ? 'text-[11px] font-mono px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold'
+                    : 'text-[11px] font-mono px-2.5 py-1 rounded-full bg-olive-100 text-olive-700';
+            }
+        };
+
+        async function getAIResponse(userText) {
+            const goal = chatState.goal;
+            const diet = chatState.diet;
+
+            // 1. If user provided a Gemini API key, call live Gemini 2.5 Flash
+            if (chatState.apiKey) {
+                try {
+                    const recipeSummary = RECIPES.map(r => `${r.title} (${window.formatPrice(r.costUSD)}, ${r.calories}kcal, ${r.protein} protein, tags: ${r.tags.join('/')})`).join('; ');
+                    const systemPrompt = `You are NourishAI, a warm, practical, evidence-informed nutrition and culturally aware recipe assistant.
+User Profile:
+- Health Goal: ${goal}
+- Dietary Preference: ${diet}
+- Preferred Currency: ${currentCurrency}
+- Available Curated Recipes: ${recipeSummary}
+
+Keep answers concise, encouraging, well-structured with bullet points, and grounded in practical everyday cooking. Include approximate costs in ${currentCurrency} when suggesting meals. Remind users gently that advice is educational.`;
+
+                    const conversationHistory = chatState.messages.slice(-6).map(m => ({
+                        role: m.role === 'assistant' ? 'model' : 'user',
+                        parts: [{ text: m.content }]
+                    }));
+                    conversationHistory.push({ role: 'user', parts: [{ text: userText }] });
+
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(chatState.apiKey)}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            systemInstruction: { parts: [{ text: systemPrompt }] },
+                            contents: conversationHistory,
+                            generationConfig: { temperature: 0.7, maxOutputTokens: 600 }
+                        })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+                        if (text) return text;
+                    } else {
+                        const errData = await response.json().catch(() => ({}));
+                        const errMsg = errData?.error?.message || 'Invalid API key or quota limit.';
+                        return `⚠️ **Live API Notice:** ${errMsg}\n\nFalling back to built-in nutrition guide:\n\n` + generateFallbackReply(userText);
+                    }
+                } catch (err) {
+                    return `⚠️ **Network Notice:** Could not reach Gemini API. Using built-in guide:\n\n` + generateFallbackReply(userText);
+                }
+            }
+
+            // 2. Built-in context-aware response engine (works offline/zero-setup)
+            return generateFallbackReply(userText);
+        }
+
+        function generateFallbackReply(userText) {
             const q = userText.toLowerCase();
             const goal = chatState.goal;
             const diet = chatState.diet;
 
-            // Filter matching recipes if possible
             let candidates = RECIPES.slice();
-            if (diet === 'Vegan') {
-                candidates = candidates.filter(r => r.tags.includes('Vegan'));
-            } else if (diet === 'Vegetarian') {
-                candidates = candidates.filter(r => r.tags.includes('Vegan') || r.tags.includes('Vegetarian'));
-            } else if (diet === 'Halal') {
-                candidates = candidates.filter(r => r.tags.some(t => t.includes('Halal')));
-            } else if (diet === 'Gluten-Free') {
-                candidates = candidates.filter(r => r.tags.some(t => t.includes('Gluten-Free')));
-            }
+            if (diet === 'Vegan') candidates = candidates.filter(r => r.tags.includes('Vegan'));
+            else if (diet === 'Vegetarian') candidates = candidates.filter(r => r.tags.includes('Vegan') || r.tags.includes('Vegetarian'));
+            else if (diet === 'Halal') candidates = candidates.filter(r => r.tags.some(t => t.includes('Halal')));
+            else if (diet === 'Gluten-Free') candidates = candidates.filter(r => r.tags.some(t => t.includes('Gluten-Free')));
+            else if (diet === 'East Asian') candidates = candidates.filter(r => r.tags.includes('East Asian'));
             if (candidates.length === 0) candidates = RECIPES;
+
+            // Match specific ingredients mentioned by user
+            const matchedByIng = candidates.filter(r =>
+                r.ingredients.some(i => q.split(/[\s,]+/).some(word => word.length > 3 && i.toLowerCase().includes(word))) ||
+                q.split(/[\s,]+/).some(word => word.length > 3 && r.title.toLowerCase().includes(word))
+            );
+
+            if (matchedByIng.length > 0) {
+                const top = matchedByIng[0];
+                return `Based on the ingredients or dish you mentioned (and your **${diet}** preference), here is a great match:\n\n• **${top.title}** — ${window.formatPrice(top.costUSD)}/serving (${top.time})\n• **Nutrition:** ${top.calories} kcal • ${top.protein} protein • ${top.fiber} fiber\n• **Key Ingredients:** ${top.ingredients.slice(0, 4).join(', ')}\n\nWould you like step-by-step cooking instructions or a lower-sodium variation?`;
+            }
 
             if (q.includes('blood pressure') || q.includes('sodium') || q.includes('salt') || q.includes('dash')) {
                 const dish = candidates.find(r => r.id === 'lentil-ginger-bowl') || candidates[0];
-                return `For blood pressure support (${goal}), keeping sodium under 400mg per meal while boosting potassium is helpful.\n\n• Top Pick: **${dish.title}** (${window.formatPrice(dish.costUSD)}/serving, ${dish.sodium} sodium, ${dish.potassium} potassium).\n• Quick Swap: Replace regular soy sauce or table salt with lemon juice, garlic, ginger, and fresh herbs to cut sodium by over 50%.`;
+                return `For blood pressure support (**${goal}**), keeping sodium under 400mg per meal while boosting potassium is ideal:\n\n• **Top Pick:** **${dish.title}** (${window.formatPrice(dish.costUSD)}/serving • ${dish.sodium} sodium • ${dish.potassium} potassium).\n• **Flavor Swap:** Replace regular soy sauce or table salt with fresh lemon juice, grated ginger, garlic, and toasted sesame oil to cut sodium by over 50%.`;
             }
 
             if (q.includes('budget') || q.includes('cheap') || q.includes('affordable') || q.includes('money') || q.includes('save')) {
                 const cheapest = [...candidates].sort((a, b) => a.costUSD - b.costUSD).slice(0, 2);
-                return `With your **${diet}** preference and **${goal}** goal, here are two high-nutrient, budget-friendly meals in ${currentCurrency}:\n\n1. **${cheapest[0].title}** — ${window.formatPrice(cheapest[0].costUSD)}/serving (${cheapest[0].protein} protein, ${cheapest[0].calories} kcal)\n2. **${cheapest[1].title}** — ${window.formatPrice(cheapest[1].costUSD)}/serving (${cheapest[1].protein} protein, ${cheapest[1].calories} kcal)\n\nBuying dry lentils, oats, and frozen greens keeps cost per meal low without sacrificing fiber.`;
+                return `Here are two high-nutrient, budget-friendly meals tailored to **${diet}** in **${currentCurrency}**:\n\n1. **${cheapest[0].title}** — ${window.formatPrice(cheapest[0].costUSD)}/serving (${cheapest[0].protein} protein, ${cheapest[0].calories} kcal)\n2. **${cheapest[1].title}** — ${window.formatPrice(cheapest[1].costUSD)}/serving (${cheapest[1].protein} protein, ${cheapest[1].calories} kcal)\n\nTip: Cooking with dry lentils, tofu, eggs, oats, and seasonal greens keeps meal costs low without sacrificing protein or fiber.`;
             }
 
             if (q.includes('sugar') || q.includes('diabetes') || q.includes('glucose') || q.includes('carb')) {
                 const lowGi = candidates.find(r => r.id === 'quinoa-black-bean-salad') || candidates[0];
-                return `To keep blood sugar steady for **${goal}**, pair complex carbohydrates with soluble fiber and protein:\n\n• Try **${lowGi.title}** (${window.formatPrice(lowGi.costUSD)}/serving, ${lowGi.fiber} fiber, ${lowGi.protein} protein).\n• Tip: Swap white rice or refined noodles for 100% buckwheat soba, quinoa, or steamed tofu with leafy greens.`;
+                return `To keep blood sugar steady for **${goal}**, pair complex carbohydrates with soluble fiber and lean protein:\n\n• **Recommended:** **${lowGi.title}** (${window.formatPrice(lowGi.costUSD)}/serving • ${lowGi.fiber} fiber • ${lowGi.protein} protein).\n• **Smart Swap:** Replace white rice or refined wheat noodles with 100% buckwheat soba, quinoa, or steamed tofu with leafy bok choy.`;
+            }
+
+            if (q.includes('protein') || q.includes('muscle') || q.includes('gym') || q.includes('workout')) {
+                const highProt = [...candidates].sort((a, b) => parseInt(b.protein) - parseInt(a.protein))[0];
+                return `For high-protein recovery tailored to **${diet}**:\n\n• **Top Option:** **${highProt.title}** delivers **${highProt.protein} protein** for ${window.formatPrice(highProt.costUSD)}/serving (${highProt.calories} kcal).\n• **Easy Boost:** Add 2 boiled eggs, 100g steamed tofu, or 1/2 cup edamame to any meal for an extra 12–15g of complete protein.`;
             }
 
             if (q.includes('breakfast') || q.includes('morning') || q.includes('quick') || q.includes('10 min')) {
                 const quick = candidates.find(r => r.id === 'oat-berry-breakfast') || candidates[0];
-                return `For a fast, no-stress option tailored to **${diet}**, try **${quick.title}** (${window.formatPrice(quick.costUSD)}/serving, ready in ${quick.time}). It delivers ${quick.protein} of protein and ${quick.fiber} of fiber to prevent mid-morning energy crashes.`;
+                return `For a fast, stress-free option (**${diet}**), try **${quick.title}** (${window.formatPrice(quick.costUSD)}/serving, ready in ${quick.time}). It provides ${quick.protein} protein and ${quick.fiber} fiber for steady morning energy.`;
             }
 
-            if (q.includes('adapt') || q.includes('swap') || q.includes('ingredient') || q.includes('fridge')) {
-                return `Here is how we can adapt any meal for **${goal}** and **${diet}**:\n\n• **Protein base:** Use lentils, edamame, eggs, tofu, or skinless chicken/fish.\n• **Volume & micronutrients:** Add 2 cups of spinach, bok choy, or broccoli to increase fullness for under 50 kcal.\n• **Flavor without excess salt:** Use ginger, garlic, turmeric, toasted sesame oil, or citrus.\n\nTell me 2–3 ingredients in your kitchen right now and I will build a dish around them!`;
-            }
+            const pick = candidates[Math.floor(Math.random() * candidates.length)];
+            return `Tailored to your **${goal}** goal and **${diet}** preference:\n\n• **Suggested Dish:** **${pick.title}** (${window.formatPrice(pick.costUSD)}/serving • ${pick.calories} kcal • ${pick.protein} protein)\n• **Why it works:** ${pick.subtitle}\n\nTell me specific ingredients you have on hand (like *chicken, tofu, oats, or salmon*) or ask for a meal plan!`;
+        }
 
-            const pick = candidates[0];
-            return `Tailored to your **${goal}** goal and **${diet}** preference:\n\n• **Recommended Dish:** **${pick.title}** (${window.formatPrice(pick.costUSD)}/serving • ${pick.calories} kcal • ${pick.protein} protein)\n• **Why it fits:** ${pick.subtitle}\n\nYou can open any dish in the **Recipes** tab for step-by-step instructions, or ask me for specific ingredient swaps!`;
+        function formatMessageHTML(text) {
+            return text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>');
         }
 
         // --- 4. ROUTER & NAVIGATION ---
@@ -552,7 +639,7 @@
                                 Eat well for your body, culture, and budget—with clear answers you can trust.
                             </h1>
                             <p class="text-lg text-olive-700 max-w-xl">
-                                Healthy recipes and nutrition guidance for weight goals, blood pressure, aging, mood, allergies, and everyday “what should I cook?” moments.
+                                Healthy recipes and interactive AI nutrition guidance for weight goals, blood pressure, aging, mood, allergies, and everyday “what should I cook?” moments.
                             </p>
                             <div class="flex flex-wrap gap-4 pt-2">
                                 <a href="#/chat" class="bg-olive-700 hover:bg-olive-800 text-white font-medium px-6 py-3.5 rounded-xl shadow-sm transition flex items-center gap-2">
@@ -568,7 +655,7 @@
                         <!-- Interactive Mini Chat Card -->
                         <div class="bg-white p-6 sm:p-8 rounded-3xl border border-olive-200 shadow-xl shadow-olive-900/5 relative">
                             <div class="absolute -top-3 -right-3 bg-olive-700 text-white text-xs font-mono px-3 py-1 rounded-full shadow-sm">
-                                Live AI Assistant
+                                Interactive AI Assistant
                             </div>
                             <div class="flex items-center gap-3 pb-4 border-b border-olive-100 mb-5">
                                 <div class="w-10 h-10 rounded-xl bg-olive-100 flex items-center justify-center text-olive-700">
@@ -576,21 +663,21 @@
                                 </div>
                                 <div>
                                     <h3 class="font-bold text-olive-900">Ask NourishAI</h3>
-                                    <p class="text-xs text-olive-600">Try a quick question right here</p>
+                                    <p class="text-xs text-olive-600">Try a live question right here</p>
                                 </div>
                             </div>
-                            <div id="hero-chat-box" class="space-y-3 text-sm mb-4 max-h-52 overflow-y-auto">
+                            <div id="hero-chat-box" class="space-y-3 text-sm mb-4 max-h-56 overflow-y-auto pr-1">
                                 <div class="bg-olive-50 p-3.5 rounded-2xl text-olive-800 border border-olive-100 text-xs leading-relaxed">
-                                    Ask me for a budget dinner, low-sodium swap, or meal idea in <strong>${currentCurrency}</strong>!
+                                    Ask me for a budget dinner, high-protein meal, or tell me what ingredients you have in <strong>${currentCurrency}</strong>!
                                 </div>
                             </div>
                             <form onsubmit="handleHeroChat(event)" class="flex gap-2">
-                                <input type="text" id="hero-chat-input" placeholder="e.g., Cheap dinner for blood pressure?" class="flex-grow px-3.5 py-2.5 text-xs bg-olive-50/70 border border-olive-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-olive-600">
-                                <button type="submit" class="bg-olive-700 hover:bg-olive-800 text-white px-4 py-2.5 rounded-xl text-xs font-medium transition">Ask</button>
+                                <input type="text" id="hero-chat-input" placeholder="e.g., Cheap dinner with tofu or salmon?" class="flex-grow px-3.5 py-2.5 text-xs bg-olive-50/70 border border-olive-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-olive-600">
+                                <button type="submit" id="hero-chat-btn" class="bg-olive-700 hover:bg-olive-800 text-white px-4 py-2.5 rounded-xl text-xs font-medium transition">Ask</button>
                             </form>
                             <div class="mt-4 pt-3 border-t border-olive-100 flex justify-between items-center">
                                 <span class="text-xs text-olive-600 font-mono">Currency: ${currentCurrency}</span>
-                                <a href="#/chat" class="text-xs font-bold text-olive-700 hover:text-olive-900 flex items-center gap-1">Open full chat <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></a>
+                                <a href="#/chat" class="text-xs font-bold text-olive-700 hover:text-olive-900 flex items-center gap-1">Open full AI chat <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></a>
                             </div>
                         </div>
                     </div>
@@ -674,20 +761,29 @@
             `;
         }
 
-        window.handleHeroChat = function(e) {
+        window.handleHeroChat = async function(e) {
             e.preventDefault();
             const input = document.getElementById('hero-chat-input');
             const box = document.getElementById('hero-chat-box');
+            const btn = document.getElementById('hero-chat-btn');
             const q = input.value.trim();
             if (!q) return;
 
-            const reply = generateSmartReply(q).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            box.innerHTML += `
-                <div class="bg-olive-900 text-white p-3 rounded-2xl text-xs ml-8">${q}</div>
-                <div class="bg-white p-3.5 rounded-2xl border border-olive-200 text-xs text-olive-800 whitespace-pre-line leading-relaxed">${reply}</div>
-            `;
             input.value = '';
+            btn.disabled = true;
+            box.innerHTML += `<div class="bg-olive-900 text-white p-3 rounded-2xl text-xs ml-8">${formatMessageHTML(q)}</div>`;
+            const typingId = 'hero-typing-' + Date.now();
+            box.innerHTML += `<div id="${typingId}" class="bg-olive-50 p-3 rounded-2xl border border-olive-200 text-xs text-olive-600 w-fit flex gap-1"><span class="w-1.5 h-1.5 bg-olive-600 rounded-full typing-dot"></span><span class="w-1.5 h-1.5 bg-olive-600 rounded-full typing-dot"></span><span class="w-1.5 h-1.5 bg-olive-600 rounded-full typing-dot"></span></div>`;
             box.scrollTop = box.scrollHeight;
+
+            const rawReply = await getAIResponse(q);
+            chatState.messages.push({ role: 'user', content: q }, { role: 'assistant', content: rawReply });
+
+            const typingEl = document.getElementById(typingId);
+            if (typingEl) typingEl.remove();
+            box.innerHTML += `<div class="bg-white p-3.5 rounded-2xl border border-olive-200 text-xs text-olive-800 whitespace-pre-line leading-relaxed">${formatMessageHTML(rawReply)}</div>`;
+            box.scrollTop = box.scrollHeight;
+            btn.disabled = false;
         };
 
         // --- 6. VIEW: RECIPES LIST ---
@@ -880,10 +976,16 @@
             `;
         }
 
-        window.askAboutRecipe = function(title) {
-            chatState.messages.push({ role: 'user', content: `How can I adapt "${title}" for my diet and budget?` });
-            chatState.messages.push({ role: 'assistant', content: generateSmartReply(`adapt ${title}`) });
+        window.askAboutRecipe = async function(title) {
+            const prompt = `How can I adapt "${title}" for my diet and budget?`;
+            chatState.messages.push({ role: 'user', content: prompt });
             window.location.hash = '#/chat';
+            const reply = await getAIResponse(prompt);
+            chatState.messages.push({ role: 'assistant', content: reply });
+            if (window.location.hash === '#/chat') {
+                renderChat(document.getElementById('app'));
+                if (window.lucide) lucide.createIcons();
+            }
         };
 
         // --- 8. VIEW: NUTRITION CHAT ---
@@ -893,8 +995,8 @@
                     <div class="grid lg:grid-cols-4 gap-8 flex-grow">
                         <div class="lg:col-span-1 bg-white p-6 rounded-3xl border border-olive-200 space-y-6 h-fit">
                             <div>
-                                <h3 class="font-serif text-lg font-bold text-olive-900">Chat Preferences</h3>
-                                <p class="text-xs text-olive-600 mt-1">Configure your goals to tailor responses.</p>
+                                <h3 class="font-serif text-lg font-bold text-olive-900">AI Chat Settings</h3>
+                                <p class="text-xs text-olive-600 mt-1">Customize your goals or connect a free Gemini API key for live AI.</p>
                             </div>
 
                             <div class="space-y-4 text-sm">
@@ -921,26 +1023,40 @@
                                     </select>
                                 </div>
 
-                                <div class="space-y-1.5">
+                                <div class="space-y-1.5 pt-2 border-t border-olive-100">
+                                    <label class="text-xs font-mono text-olive-700 font-bold uppercase flex items-center justify-between">
+                                        <span>Gemini API Key</span>
+                                        <a href="https://aistudio.google.com/apikey" target="_blank" class="text-[10px] underline text-olive-600 hover:text-olive-900">Get free key</a>
+                                    </label>
+                                    <input type="password" value="${chatState.apiKey}" placeholder="Optional: AIzaSy..." oninput="saveApiKey(this.value)" class="w-full text-xs font-mono bg-olive-50 border border-olive-200 rounded-xl p-2.5 text-olive-900 focus:outline-none focus:ring-2 focus:ring-olive-600">
+                                    <p class="text-[11px] text-olive-600">Saved locally in your browser. Works out-of-the-box even without a key.</p>
+                                </div>
+
+                                <div class="space-y-1.5 pt-2 border-t border-olive-100">
                                     <label class="text-xs font-mono text-olive-700 font-bold uppercase">Quick Prompts</label>
                                     <div class="flex flex-col gap-2 pt-1">
-                                        <button type="button" onclick="sendQuickPrompt('Suggest an affordable meal under budget')" class="text-left text-xs bg-olive-50 hover:bg-olive-100 text-olive-800 p-2.5 rounded-xl border border-olive-200/70 transition">💰 Budget-friendly meal</button>
+                                        <button type="button" onclick="sendQuickPrompt('Suggest an affordable high-protein meal under budget')" class="text-left text-xs bg-olive-50 hover:bg-olive-100 text-olive-800 p-2.5 rounded-xl border border-olive-200/70 transition">💰 Budget high-protein meal</button>
                                         <button type="button" onclick="sendQuickPrompt('Low sodium ideas for blood pressure')" class="text-left text-xs bg-olive-50 hover:bg-olive-100 text-olive-800 p-2.5 rounded-xl border border-olive-200/70 transition">❤️ Low-sodium blood pressure</button>
-                                        <button type="button" onclick="sendQuickPrompt('Steady blood sugar meal swaps')" class="text-left text-xs bg-olive-50 hover:bg-olive-100 text-olive-800 p-2.5 rounded-xl border border-olive-200/70 transition">🌾 Blood sugar balance</button>
+                                        <button type="button" onclick="sendQuickPrompt('I have tofu, bok choy, and garlic. What can I make?')" class="text-left text-xs bg-olive-50 hover:bg-olive-100 text-olive-800 p-2.5 rounded-xl border border-olive-200/70 transition">🥬 Cook with what I have</button>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="lg:col-span-3 bg-white rounded-3xl border border-olive-200 flex flex-col h-[650px] shadow-sm">
-                            <div class="p-6 border-b border-olive-100 flex items-center justify-between">
+                        <div class="lg:col-span-3 bg-white rounded-3xl border border-olive-200 flex flex-col h-[660px] shadow-sm">
+                            <div class="p-6 border-b border-olive-100 flex flex-wrap items-center justify-between gap-3">
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 rounded-xl bg-olive-700 text-white flex items-center justify-center">
                                         <i data-lucide="bot" class="w-5 h-5"></i>
                                     </div>
                                     <div>
-                                        <h3 class="font-serif font-bold text-olive-900">NourishAI Guide</h3>
-                                        <p class="text-xs text-olive-600 font-mono">Goal: <span class="font-bold text-olive-800">${chatState.goal}</span> • Diet: <span class="font-bold text-olive-800">${chatState.diet}</span></p>
+                                        <div class="flex items-center gap-2">
+                                            <h3 class="font-serif font-bold text-olive-900">NourishAI Guide</h3>
+                                            <span id="ai-mode-badge" class="text-[11px] font-mono px-2.5 py-0.5 rounded-full ${chatState.apiKey ? 'bg-emerald-100 text-emerald-800 font-bold' : 'bg-olive-100 text-olive-700'}">
+                                                ${chatState.apiKey ? 'Live Gemini AI Connected' : 'Built-In Smart Guide'}
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-olive-600 font-mono mt-0.5">Goal: <span class="font-bold text-olive-800">${chatState.goal}</span> • Diet: <span class="font-bold text-olive-800">${chatState.diet}</span></p>
                                     </div>
                                 </div>
                                 <button onclick="clearChat()" class="text-xs font-mono text-olive-600 hover:text-olive-900 underline">Clear Chat</button>
@@ -953,16 +1069,28 @@
                                             <i data-lucide="${msg.role === 'user' ? 'user' : 'bot'}" class="w-4 h-4"></i>
                                         </div>
                                         <div class="max-w-xl p-4 rounded-2xl text-sm ${msg.role === 'user' ? 'bg-olive-900 text-white rounded-tr-none' : 'bg-olive-50 text-olive-900 border border-olive-200 rounded-tl-none'}">
-                                            <div class="whitespace-pre-line leading-relaxed">${msg.content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</div>
+                                            <div class="whitespace-pre-line leading-relaxed">${formatMessageHTML(msg.content)}</div>
                                         </div>
                                     </div>
                                 `).join('')}
+                                ${chatState.isTyping ? `
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-8 h-8 rounded-xl bg-olive-100 text-olive-700 flex items-center justify-center shrink-0">
+                                            <i data-lucide="bot" class="w-4 h-4"></i>
+                                        </div>
+                                        <div class="bg-olive-50 border border-olive-200 p-4 rounded-2xl rounded-tl-none flex items-center gap-1.5">
+                                            <span class="w-2 h-2 bg-olive-600 rounded-full typing-dot"></span>
+                                            <span class="w-2 h-2 bg-olive-600 rounded-full typing-dot"></span>
+                                            <span class="w-2 h-2 bg-olive-600 rounded-full typing-dot"></span>
+                                        </div>
+                                    </div>
+                                ` : ''}
                             </div>
 
                             <div class="p-4 border-t border-olive-100 bg-cream-50/50 rounded-b-3xl">
                                 <form onsubmit="handleChatSubmit(event)" class="flex gap-2">
-                                    <input type="text" id="chat-input" placeholder="Ask about nutrition, recipes, or meal swaps..." class="flex-grow px-4 py-3 text-sm bg-white border border-olive-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-olive-600">
-                                    <button type="submit" class="bg-olive-700 hover:bg-olive-800 text-white px-6 py-3 rounded-xl font-medium text-sm flex items-center gap-2 shadow-sm transition shrink-0">
+                                    <input type="text" id="chat-input" ${chatState.isTyping ? 'disabled' : ''} placeholder="Ask about nutrition, recipes, ingredients, or meal swaps..." class="flex-grow px-4 py-3 text-sm bg-white border border-olive-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-olive-600">
+                                    <button type="submit" ${chatState.isTyping ? 'disabled' : ''} class="bg-olive-700 hover:bg-olive-800 disabled:opacity-50 text-white px-6 py-3 rounded-xl font-medium text-sm flex items-center gap-2 shadow-sm transition shrink-0">
                                         <span>Send</span>
                                         <i data-lucide="send" class="w-4 h-4"></i>
                                     </button>
@@ -984,24 +1112,40 @@
             if (window.lucide) lucide.createIcons();
         };
 
-        window.sendQuickPrompt = function(text) {
+        window.sendQuickPrompt = async function(text) {
+            if (chatState.isTyping) return;
             chatState.messages.push({ role: 'user', content: text });
-            chatState.messages.push({ role: 'assistant', content: generateSmartReply(text) });
+            chatState.isTyping = true;
+            renderChat(document.getElementById('app'));
+            if (window.lucide) lucide.createIcons();
+
+            const reply = await getAIResponse(text);
+            chatState.isTyping = false;
+            chatState.messages.push({ role: 'assistant', content: reply });
             renderChat(document.getElementById('app'));
             if (window.lucide) lucide.createIcons();
         };
 
-        window.handleChatSubmit = function(e) {
+        window.handleChatSubmit = async function(e) {
             e.preventDefault();
+            if (chatState.isTyping) return;
             const inputEl = document.getElementById('chat-input');
             const text = inputEl.value.trim();
             if (!text) return;
 
             chatState.messages.push({ role: 'user', content: text });
             inputEl.value = '';
-            chatState.messages.push({ role: 'assistant', content: generateSmartReply(text) });
+            chatState.isTyping = true;
             renderChat(document.getElementById('app'));
             if (window.lucide) lucide.createIcons();
+
+            const reply = await getAIResponse(text);
+            chatState.isTyping = false;
+            chatState.messages.push({ role: 'assistant', content: reply });
+            renderChat(document.getElementById('app'));
+            if (window.lucide) lucide.createIcons();
+            const newInput = document.getElementById('chat-input');
+            if (newInput) newInput.focus();
         };
 
         // --- 9. VIEW: FOOD CHECK ---
