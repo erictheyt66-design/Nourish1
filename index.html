@@ -121,7 +121,7 @@
                     </div>
                     <span class="font-serif text-lg font-bold">NourishAI</span>
                 </div>
-                <p class="text-xs text-olive-200 max-w-sm">Conversational nutrition guidance grounded in recipes and evidence-informed notes. Educational only—not a substitute for clinical care.</p>
+                <p class="text-xs text-olive-200 max-w-md">Curated recipes inspired by MedlinePlus, BBC Good Food, Jamie Oliver, and Budget Bytes. Educational nutrition guidance only—not a substitute for clinical care.</p>
             </div>
             <div class="flex flex-wrap justify-center gap-6 text-sm text-olive-200">
                 <a href="#/recipes" class="hover:text-white transition">Recipes</a>
@@ -163,279 +163,407 @@
             return `${cur.symbol}${converted.toFixed(2)}`;
         };
 
-        // --- 2. CURATED RECIPE DATABASE ---
+        // --- 2. CURATED RECIPE DATABASE (MEDLINEPLUS, BBC GOOD FOOD, JAMIE OLIVER, BUDGET BYTES) ---
+        const RECIPE_SOURCES = [
+            { name: 'MedlinePlus', url: 'https://medlineplus.gov/recipes/' },
+            { name: 'BBC Good Food', url: 'https://www.bbcgoodfood.com/' },
+            { name: 'Jamie Oliver', url: 'https://www.jamieoliver.com/' },
+            { name: 'Budget Bytes', url: 'https://www.budgetbytes.com/category/recipes/meat/' }
+        ];
+
         const RECIPES = [
+            // --- MEDLINEPLUS RECIPES ---
             {
-                id: 'lentil-ginger-bowl',
-                title: 'Ginger lentil power bowl',
-                subtitle: 'Warm red lentils with turmeric, spinach, and lemon — filling, affordable, and gentle on blood pressure.',
-                category: 'Weight management',
-                category2: 'Blood pressure',
-                image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1200&q=80',
-                time: '40 min',
-                costUSD: 1.85,
-                calories: 320,
-                protein: '18g',
-                carbs: '48g',
-                fiber: '14g',
-                sodium: '210mg',
-                potassium: '680mg',
-                omega3: '1.2g',
-                tags: ['Vegan', 'Halal', 'Gluten-Free', 'Low Sodium', 'High Fiber'],
-                ingredients: [
-                    '1 cup red lentils, rinsed',
-                    '1 tsp fresh grated ginger',
-                    '1/2 tsp ground turmeric',
-                    '2 cups fresh baby spinach',
-                    '1 tbsp extra virgin olive oil',
-                    'Juice of 1/2 fresh lemon',
-                    '3 cups low-sodium vegetable broth'
-                ],
-                steps: [
-                    'Rinse red lentils thoroughly under cold water until clear.',
-                    'Heat olive oil in a medium pot over medium heat and sauté ginger and turmeric for 1 minute until fragrant.',
-                    'Add lentils and low-sodium vegetable broth. Bring to a boil, then simmer covered for 25 minutes until tender.',
-                    'Stir in baby spinach until wilted, finish with fresh lemon juice, and serve warm.'
-                ]
-            },
-            {
-                id: 'oat-berry-breakfast',
-                title: 'Overnight oat & berry jar',
-                subtitle: 'No-cook breakfast with rolled oats, yogurt, berries, and chia — steady energy for mood and focus.',
-                category: 'Mood & mind',
-                category2: 'Weight management',
-                image: 'https://images.unsplash.com/photo-1495214783159-240b8f3a7c5c?auto=format&fit=crop&w=1200&q=80',
-                time: '10 min',
-                costUSD: 2.10,
-                calories: 310,
+                id: 'medline-black-bean-burgers',
+                source: 'MedlinePlus',
+                sourceUrl: 'https://medlineplus.gov/recipes/',
+                title: 'Heart-healthy black bean & oat burgers',
+                subtitle: 'NIH MedlinePlus classic using rolled oats, black beans, and cumin for high soluble fiber and low sodium.',
+                category: 'Blood pressure',
+                category2: 'Heart health',
+                image: 'https://images.unsplash.com/photo-1520072959219-c595dc870360?auto=format&fit=crop&w=1200&q=80',
+                time: '30 min',
+                costUSD: 1.75,
+                calories: 290,
                 protein: '14g',
-                carbs: '44g',
-                fiber: '9g',
-                sodium: '85mg',
-                potassium: '340mg',
-                omega3: '2.1g',
-                tags: ['Vegetarian', 'Halal', 'Gluten-Free Option', 'Brain Food'],
+                carbs: '46g',
+                fiber: '11g',
+                sodium: '215mg',
+                potassium: '640mg',
+                omega3: '0.4g',
+                tags: ['Vegetarian', 'Halal', 'Low Sodium', 'DASH Friendly', 'MedlinePlus'],
                 ingredients: [
-                    '1/2 cup rolled oats',
-                    '1/2 cup plain Greek yogurt',
-                    '1/2 cup unsweetened almond or soy milk',
-                    '1 tbsp chia seeds',
-                    '1/2 cup mixed fresh or frozen berries'
+                    '1 can (15 oz) no-salt-added black beans, drained & rinsed',
+                    '1/2 cup quick-cooking rolled oats',
+                    '1/4 cup finely chopped yellow onion',
+                    '1 tsp ground cumin & 1/2 tsp garlic powder',
+                    '1 large egg (or flax egg)',
+                    '1 tsp olive oil for pan-searing'
                 ],
                 steps: [
-                    'Combine rolled oats, Greek yogurt, milk, and chia seeds in a jar or bowl.',
-                    'Stir thoroughly so no dry oat pockets remain.',
-                    'Top with berries, cover, and refrigerate for at least 4 hours or overnight.',
-                    'Enjoy chilled straight from the jar.'
+                    'Mash black beans in a bowl with a fork until mostly smooth with a few whole beans for texture.',
+                    'Stir in rolled oats, finely chopped onion, cumin, garlic powder, and egg until well combined; let rest 5 minutes.',
+                    'Form into 4 patties and cook in a lightly oiled nonstick skillet over medium heat for 4–5 minutes per side until browned.'
                 ]
             },
             {
-                id: 'salmon-greens',
-                title: 'Lemon herb baked salmon with greens',
-                subtitle: 'Omega-3 rich salmon with garlicky greens — a mental-health and cardiovascular staple.',
+                id: 'medline-baked-cod-tomatoes',
+                source: 'MedlinePlus',
+                sourceUrl: 'https://medlineplus.gov/recipes/',
+                title: 'Mediterranean baked cod with tomatoes & basil',
+                subtitle: 'Lean white fish baked over juicy tomatoes, garlic, and olive oil—gentle on blood pressure and blood sugar.',
+                category: 'Blood sugar',
+                category2: 'Blood pressure',
+                image: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=1200&q=80',
+                time: '25 min',
+                costUSD: 4.40,
+                calories: 260,
+                protein: '31g',
+                carbs: '9g',
+                fiber: '2g',
+                sodium: '230mg',
+                potassium: '690mg',
+                omega3: '0.9g',
+                tags: ['Halal', 'Gluten-Free', 'Low Sodium', 'High Protein', 'MedlinePlus'],
+                ingredients: [
+                    '2 cod fillets (approx. 150g each)',
+                    '1.5 cups diced fresh or no-salt-added tomatoes',
+                    '2 cloves garlic, minced',
+                    '1 tbsp extra virgin olive oil',
+                    '1/4 cup fresh basil leaves, torn',
+                    'Freshly cracked black pepper & lemon wedges'
+                ],
+                steps: [
+                    'Preheat oven to 200°C (400°F). Toss tomatoes, garlic, and olive oil in a shallow baking dish.',
+                    'Nestle cod fillets into the tomato mixture, season with black pepper, and bake 15–18 minutes until fish flakes easily.',
+                    'Scatter fresh basil over top and serve with lemon wedges.'
+                ]
+            },
+            {
+                id: 'medline-apple-cinnamon-oats',
+                source: 'MedlinePlus',
+                sourceUrl: 'https://medlineplus.gov/recipes/',
+                title: 'Warm apple cinnamon rolled oats',
+                subtitle: 'Clinical nutrition staple rich in beta-glucan fiber to support healthy cholesterol and steady morning energy.',
+                category: 'Heart health',
+                category2: 'Weight management',
+                image: 'https://images.unsplash.com/photo-1517673132405-a56a62b18caf?auto=format&fit=crop&w=1200&q=80',
+                time: '12 min',
+                costUSD: 1.35,
+                calories: 280,
+                protein: '10g',
+                carbs: '49g',
+                fiber: '8g',
+                sodium: '65mg',
+                potassium: '360mg',
+                omega3: '1.1g',
+                tags: ['Vegetarian', 'Halal', 'Gluten-Free Option', 'Low Sodium', 'MedlinePlus'],
+                ingredients: [
+                    '1/2 cup old-fashioned rolled oats',
+                    '1 cup water or low-fat milk',
+                    '1/2 crisp apple, diced with skin on',
+                    '1/2 tsp ground cinnamon',
+                    '1 tbsp chopped walnuts'
+                ],
+                steps: [
+                    'Bring water or milk to a simmer in a small saucepan, then stir in oats, diced apple, and cinnamon.',
+                    'Cook over medium-low heat for 5–7 minutes, stirring occasionally until creamy.',
+                    'Top with chopped walnuts for heart-healthy omega-3 fats.'
+                ]
+            },
+
+            // --- BBC GOOD FOOD RECIPES ---
+            {
+                id: 'bbc-smoky-chickpea-spinach',
+                source: 'BBC Good Food',
+                sourceUrl: 'https://www.bbcgoodfood.com/',
+                title: 'Smoky chickpea, tomato & spinach stew',
+                subtitle: 'BBC Good Food 20-minute pantry favorite packed with plant protein, iron, and smoked paprika.',
+                category: 'Weight management',
+                category2: 'Heart health',
+                image: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=1200&q=80',
+                time: '20 min',
+                costUSD: 1.90,
+                calories: 330,
+                protein: '15g',
+                carbs: '47g',
+                fiber: '12g',
+                sodium: '280mg',
+                potassium: '650mg',
+                omega3: '0.4g',
+                tags: ['Vegan', 'Halal', 'Gluten-Free', 'High Fiber', 'BBC Good Food'],
+                ingredients: [
+                    '1 can (400g) chickpeas, drained & rinsed',
+                    '1 can (400g) chopped tomatoes',
+                    '200g fresh baby spinach',
+                    '1 tsp smoked paprika & 1/2 tsp ground cumin',
+                    '2 cloves garlic, crushed',
+                    '1 tsp olive oil'
+                ],
+                steps: [
+                    'Heat olive oil in a deep frying pan, add garlic, smoked paprika, and cumin, and fry for 1 minute.',
+                    'Tip in the chickpeas and chopped tomatoes, simmering gently for 10 minutes until thickened.',
+                    'Fold in baby spinach until wilted and serve warm.'
+                ]
+            },
+            {
+                id: 'bbc-teriyaki-salmon-greens',
+                source: 'BBC Good Food',
+                sourceUrl: 'https://www.bbcgoodfood.com/',
+                title: 'Healthy teriyaki salmon with sesame pak choi',
+                subtitle: 'Omega-3 rich salmon glazed with ginger, garlic, and reduced-sodium soy alongside crisp pak choi.',
                 category: 'Mood & mind',
                 category2: 'Heart health',
                 image: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=1200&q=80',
-                time: '28 min',
-                costUSD: 6.50,
-                calories: 420,
-                protein: '34g',
-                carbs: '6g',
+                time: '22 min',
+                costUSD: 5.90,
+                calories: 410,
+                protein: '33g',
+                carbs: '14g',
                 fiber: '4g',
-                sodium: '290mg',
-                potassium: '590mg',
-                omega3: '3.4g',
-                tags: ['Halal', 'Gluten-Free', 'High Protein', 'Heart Healthy'],
-                ingredients: [
-                    '1 salmon fillet (approx. 170g / 6 oz)',
-                    '2 cups chopped kale or choy sum',
-                    '1 clove garlic, minced',
-                    '1/2 lemon (sliced and juiced)',
-                    '1 tsp extra virgin olive oil',
-                    'Dried oregano & freshly cracked black pepper'
-                ],
-                steps: [
-                    'Preheat oven to 200°C (400°F). Place salmon on a parchment-lined baking tray.',
-                    'Brush with half the olive oil, season with oregano and black pepper, and top with lemon slices. Bake 12–15 minutes.',
-                    'Meanwhile, sauté garlic and greens in remaining olive oil over medium heat for 3–4 minutes until tender.',
-                    'Plate the salmon alongside the garlic greens and finish with fresh lemon juice.'
-                ]
-            },
-            {
-                id: 'quinoa-black-bean-salad',
-                title: 'Avocado quinoa & black bean bowl',
-                subtitle: 'Plant protein and monounsaturated fats for sustained afternoon energy and steady blood sugar.',
-                category: 'Blood sugar',
-                category2: 'Heart health',
-                image: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=1200&q=80',
-                time: '20 min',
-                costUSD: 2.45,
-                calories: 390,
-                protein: '15g',
-                carbs: '52g',
-                fiber: '12g',
-                sodium: '240mg',
-                potassium: '720mg',
-                omega3: '0.8g',
-                tags: ['Vegan', 'Halal', 'Gluten-Free', 'Blood Sugar Friendly'],
-                ingredients: [
-                    '1/2 cup cooked quinoa',
-                    '1/2 cup canned black beans, drained & rinsed',
-                    '1/4 ripe avocado, diced',
-                    '1/4 cup cherry tomatoes, halved',
-                    '1 tbsp fresh lime juice & chopped cilantro'
-                ],
-                steps: [
-                    'Combine cooked quinoa and rinsed black beans in a serving bowl.',
-                    'Fold in diced avocado and halved cherry tomatoes.',
-                    'Dress with fresh lime juice, cilantro, and a drizzle of olive oil.'
-                ]
-            },
-            {
-                id: 'mediterranean-chickpea-stew',
-                title: 'Provençal rosemary chickpea stew',
-                subtitle: 'Rich in soluble fiber and polyphenols to support cardiovascular health and gentle satiety.',
-                category: 'Heart health',
-                category2: 'Weight management',
-                image: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=1200&q=80',
-                time: '35 min',
-                costUSD: 1.95,
-                calories: 340,
-                protein: '16g',
-                carbs: '48g',
-                fiber: '11g',
-                sodium: '310mg',
+                sodium: '340mg',
                 potassium: '610mg',
-                omega3: '0.5g',
-                tags: ['Vegan', 'Halal', 'Gluten-Free', 'DASH Friendly'],
+                omega3: '3.2g',
+                tags: ['Halal', 'High Protein', 'Brain Food', 'BBC Good Food'],
                 ingredients: [
-                    '1 can (400g) chickpeas, drained & rinsed',
-                    '1 cup crushed no-salt-added tomatoes',
-                    '1 sprig fresh rosemary',
-                    '1 small yellow onion, diced',
-                    '2 cloves garlic, minced'
+                    '2 salmon fillets',
+                    '1 tbsp reduced-sodium soy sauce',
+                    '1 tsp clear honey & 1 tsp grated fresh ginger',
+                    '2 heads pak choi (bok choy), halved lengthwise',
+                    '1 tsp toasted sesame seeds'
                 ],
                 steps: [
-                    'Sauté diced onion and garlic in 1 tsp olive oil until translucent.',
-                    'Add crushed tomatoes, chickpeas, and fresh rosemary sprig.',
-                    'Simmer gently on low heat for 25 minutes. Remove rosemary sprig before serving.'
+                    'Whisk soy sauce, honey, and grated ginger; brush over salmon fillets and bake at 200°C for 12–15 minutes.',
+                    'Steam or stir-fry pak choi for 3 minutes until bright green and tender.',
+                    'Serve salmon over pak choi and scatter with toasted sesame seeds.'
                 ]
             },
             {
-                id: 'turmeric-chicken-soup',
-                title: 'Golden turmeric chicken & vegetable soup',
-                subtitle: 'Comforting, protein-rich broth with lean chicken breast, carrots, celery, and ginger.',
-                category: 'Healthy aging',
-                category2: 'Everyday healthy',
-                image: 'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1200&q=80',
-                time: '45 min',
-                costUSD: 3.20,
-                calories: 280,
-                protein: '26g',
-                carbs: '22g',
-                fiber: '5g',
-                sodium: '380mg',
-                potassium: '520mg',
-                omega3: '0.3g',
-                tags: ['Halal Option', 'Gluten-Free', 'High Protein', 'Bone & Muscle'],
-                ingredients: [
-                    '1 boneless skinless chicken breast (150g)',
-                    '4 cups low-sodium chicken broth',
-                    '2 medium carrots, sliced',
-                    '2 stalks celery, sliced',
-                    '1 tsp ground turmeric & 1/2 tsp grated ginger'
-                ],
-                steps: [
-                    'Simmer chicken breast in broth with carrots, celery, turmeric, and ginger for 20 minutes until cooked through.',
-                    'Remove chicken, shred with two forks, and return to the pot.',
-                    'Season with black pepper and serve warm.'
-                ]
-            },
-            {
-                id: 'toba-soba-noodles',
-                title: 'Sesame ginger buckwheat soba & edamame',
-                subtitle: 'Low-glycemic whole-grain buckwheat noodles loaded with plant protein and toasted sesame.',
+                id: 'bbc-lentil-sweet-potato-curry',
+                source: 'BBC Good Food',
+                sourceUrl: 'https://www.bbcgoodfood.com/',
+                title: 'Red lentil & sweet potato dhal',
+                subtitle: 'Creamy, warming coconut-free red lentil curry rich in beta-carotene, potassium, and plant fiber.',
                 category: 'Blood sugar',
-                category2: 'Everyday healthy',
+                category2: 'Weight management',
+                image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1200&q=80',
+                time: '35 min',
+                costUSD: 1.80,
+                calories: 350,
+                protein: '16g',
+                carbs: '56g',
+                fiber: '13g',
+                sodium: '240mg',
+                potassium: '740mg',
+                omega3: '0.3g',
+                tags: ['Vegan', 'Halal', 'Gluten-Free', 'Low GI', 'BBC Good Food'],
+                ingredients: [
+                    '150g split red lentils, rinsed',
+                    '1 medium sweet potato, peeled & cubed',
+                    '1 tbsp mild curry powder & 1/2 tsp turmeric',
+                    '500ml low-sodium vegetable stock',
+                    '1 handful fresh cilantro, chopped'
+                ],
+                steps: [
+                    'Combine red lentils, cubed sweet potato, curry powder, turmeric, and vegetable stock in a saucepan.',
+                    'Bring to a boil, then simmer covered for 20–25 minutes until lentils are soft and sweet potato is tender.',
+                    'Garnish with fresh cilantro and serve.'
+                ]
+            },
+
+            // --- JAMIE OLIVER RECIPES ---
+            {
+                id: 'jamie-super-green-pasta',
+                source: 'Jamie Oliver',
+                sourceUrl: 'https://www.jamieoliver.com/',
+                title: 'Jamie’s super green whole-wheat spaghetti',
+                subtitle: 'Blended broccoli, spinach, garlic, and lemon sauce tossed with whole-grain pasta for vibrant micronutrients.',
+                category: 'Mood & mind',
+                category2: 'Healthy aging',
+                image: 'https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=1200&q=80',
+                time: '20 min',
+                costUSD: 2.35,
+                calories: 380,
+                protein: '15g',
+                carbs: '58g',
+                fiber: '10g',
+                sodium: '210mg',
+                potassium: '580mg',
+                omega3: '0.5g',
+                tags: ['Vegetarian', 'Halal', 'High Fiber', 'Jamie Oliver'],
+                ingredients: [
+                    '150g whole-wheat spaghetti',
+                    '150g broccoli florets',
+                    '2 large handfuls baby spinach',
+                    '1 clove garlic & zest + juice of 1/2 lemon',
+                    '1 tbsp extra virgin olive oil & 15g grated Parmesan'
+                ],
+                steps: [
+                    'Boil whole-wheat spaghetti according to packet instructions, adding broccoli florets for the final 4 minutes.',
+                    'Drain (reserving a splash of cooking water) and blend broccoli, spinach, garlic, lemon, olive oil, and Parmesan into a vibrant green sauce.',
+                    'Toss pasta with the green sauce, loosening with reserved cooking water.'
+                ]
+            },
+            {
+                id: 'jamie-mediterranean-traybake',
+                source: 'Jamie Oliver',
+                sourceUrl: 'https://www.jamieoliver.com/',
+                title: 'Mediterranean roast veg & feta traybake',
+                subtitle: 'One-pan bell peppers, zucchini, red onion, and cherry tomatoes roasted with oregano and crumbled feta.',
+                category: 'Weight management',
+                category2: 'Blood pressure',
+                image: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=1200&q=80',
+                time: '35 min',
+                costUSD: 2.65,
+                calories: 310,
+                protein: '12g',
+                carbs: '28g',
+                fiber: '8g',
+                sodium: '330mg',
+                potassium: '670mg',
+                omega3: '0.4g',
+                tags: ['Vegetarian', 'Halal', 'Gluten-Free', 'One-Pan', 'Jamie Oliver'],
+                ingredients: [
+                    '1 red bell pepper & 1 zucchini, chunked',
+                    '1 red onion, cut into wedges',
+                    '200g cherry tomatoes',
+                    '1 tsp dried oregano & 1 tbsp olive oil',
+                    '40g reduced-fat feta cheese, crumbled'
+                ],
+                steps: [
+                    'Toss peppers, zucchini, red onion, and tomatoes on a roasting tray with olive oil, oregano, and black pepper.',
+                    'Roast at 200°C (400°F) for 25–30 minutes until caramelized and tender.',
+                    'Scatter crumbled feta over the warm vegetables before serving.'
+                ]
+            },
+            {
+                id: 'jamie-harissa-chicken-couscous',
+                source: 'Jamie Oliver',
+                sourceUrl: 'https://www.jamieoliver.com/',
+                title: 'Quick harissa chicken & herby couscous',
+                subtitle: 'Pan-seared lean chicken breast rubbed with smoky rose harissa over fluffy whole-wheat couscous and herbs.',
+                category: 'Healthy aging',
+                category2: 'Blood sugar',
+                image: 'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1200&q=80',
+                time: '25 min',
+                costUSD: 3.60,
+                calories: 410,
+                protein: '35g',
+                carbs: '42g',
+                fiber: '6g',
+                sodium: '310mg',
+                potassium: '510mg',
+                omega3: '0.3g',
+                tags: ['Halal', 'High Protein', 'Quick Meal', 'Jamie Oliver'],
+                ingredients: [
+                    '1 skinless chicken breast (160g), butterflied',
+                    '1 tsp harissa paste',
+                    '60g whole-wheat couscous',
+                    '120ml boiling low-sodium stock',
+                    'Fresh mint & parsley, chopped, plus lemon juice'
+                ],
+                steps: [
+                    'Rub chicken breast with harissa paste and sear in a nonstick griddle pan for 4 minutes per side until cooked through.',
+                    'Pour boiling stock over couscous, cover for 5 minutes, then fluff with a fork, herbs, and lemon juice.',
+                    'Slice chicken over the herby couscous.'
+                ]
+            },
+
+            // --- BUDGET BYTES RECIPES ---
+            {
+                id: 'budgetbytes-skillet-chicken-thighs',
+                source: 'Budget Bytes',
+                sourceUrl: 'https://www.budgetbytes.com/category/recipes/meat/',
+                title: 'Garlic herb skillet chicken thighs & green beans',
+                subtitle: 'Budget Bytes favorite turning affordable bone-in or boneless chicken thighs into a juicy one-skillet meal.',
+                category: 'Weight management',
+                category2: 'Healthy aging',
+                image: 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=1200&q=80',
+                time: '30 min',
+                costUSD: 2.25,
+                calories: 370,
+                protein: '32g',
+                carbs: '11g',
+                fiber: '4g',
+                sodium: '295mg',
+                potassium: '540mg',
+                omega3: '0.4g',
+                tags: ['Halal', 'Gluten-Free', 'Budget Friendly', 'High Protein', 'Budget Bytes'],
+                ingredients: [
+                    '2 boneless skinless chicken thighs (approx. 180g)',
+                    '2 cups fresh or frozen green beans, trimmed',
+                    '2 cloves garlic, minced',
+                    '1/2 tsp dried thyme & 1/2 tsp paprika',
+                    '1 tsp olive oil & squeeze of lemon'
+                ],
+                steps: [
+                    'Season chicken thighs with paprika, thyme, and black pepper; sear in olive oil over medium heat for 6 minutes per side until golden and cooked through.',
+                    'Remove chicken briefly, sauté green beans and garlic in the same skillet for 4–5 minutes until crisp-tender.',
+                    'Return chicken to the pan, finish with a squeeze of lemon, and serve.'
+                ]
+            },
+            {
+                id: 'budgetbytes-beef-cabbage-stirfry',
+                source: 'Budget Bytes',
+                sourceUrl: 'https://www.budgetbytes.com/category/recipes/meat/',
+                title: 'Ginger garlic ground beef & cabbage stir-fry',
+                subtitle: 'Ultra-economical 15-minute skillet meal stretching lean ground beef with crunchy shredded cabbage and carrots.',
+                category: 'Blood sugar',
+                category2: 'Weight management',
                 image: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=1200&q=80',
                 time: '15 min',
-                costUSD: 2.80,
-                calories: 380,
-                protein: '19g',
-                carbs: '58g',
-                fiber: '8g',
-                sodium: '320mg',
-                potassium: '410mg',
-                omega3: '0.9g',
-                tags: ['Vegan', 'Halal', 'East Asian', 'Low GI'],
+                costUSD: 1.95,
+                calories: 340,
+                protein: '25g',
+                carbs: '16g',
+                fiber: '5g',
+                sodium: '330mg',
+                potassium: '590mg',
+                omega3: '0.3g',
+                tags: ['Halal', 'Gluten-Free', 'Budget Friendly', 'Low Carb', 'Budget Bytes'],
                 ingredients: [
-                    '80g 100% buckwheat soba noodles',
-                    '1/2 cup shelled edamame beans',
-                    '1 tsp toasted sesame oil',
-                    '1 tbsp reduced-sodium soy sauce or tamari',
-                    '2 stalks spring onions, sliced'
+                    '120g extra-lean ground beef',
+                    '3 cups green cabbage, thinly shredded',
+                    '1 medium carrot, julienned or grated',
+                    '1 tbsp grated ginger & 2 cloves minced garlic',
+                    '1 tbsp reduced-sodium soy sauce & 1 tsp toasted sesame oil'
                 ],
                 steps: [
-                    'Boil soba noodles and edamame together for 5 minutes until tender. Drain and rinse under cold water.',
-                    'Toss with toasted sesame oil, reduced-sodium soy sauce, and sliced spring onions.'
+                    'Brown lean ground beef with ginger and garlic in a large skillet over medium-high heat for 5 minutes.',
+                    'Add shredded cabbage and carrot; stir-fry for 4–5 minutes until tender-crisp.',
+                    'Toss with reduced-sodium soy sauce and sesame oil and serve hot.'
                 ]
             },
             {
-                id: 'steamed-tofu-bok-choy',
-                title: 'Steamed silken tofu with garlic bok choy',
-                subtitle: 'Light, calcium-rich East Asian classic that comes together in 12 minutes on a tight budget.',
-                category: 'Healthy aging',
-                category2: 'Blood pressure',
+                id: 'budgetbytes-turkey-black-bean-skillet',
+                source: 'Budget Bytes',
+                sourceUrl: 'https://www.budgetbytes.com/category/recipes/meat/',
+                title: 'Southwest turkey & black bean skillet',
+                subtitle: 'High-protein, high-fiber weeknight meat & bean skillet that stretches every dollar without sacrificing flavor.',
+                category: 'Heart health',
+                category2: 'Blood sugar',
                 image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=1200&q=80',
-                time: '12 min',
-                costUSD: 1.75,
-                calories: 230,
-                protein: '17g',
-                carbs: '12g',
-                fiber: '4g',
-                sodium: '270mg',
-                potassium: '540mg',
-                omega3: '0.7g',
-                tags: ['Vegan', 'Halal', 'East Asian', 'Budget Friendly'],
+                time: '25 min',
+                costUSD: 2.10,
+                calories: 360,
+                protein: '29g',
+                carbs: '34g',
+                fiber: '9g',
+                sodium: '315mg',
+                potassium: '630mg',
+                omega3: '0.4g',
+                tags: ['Halal', 'Gluten-Free', 'Budget Friendly', 'High Fiber', 'Budget Bytes'],
                 ingredients: [
-                    '200g firm or silken tofu, sliced',
-                    '2 heads baby bok choy, halved',
-                    '2 cloves garlic, finely minced',
-                    '1 tsp sesame oil',
-                    '2 tsp reduced-sodium soy sauce'
+                    '120g lean ground turkey (or chicken)',
+                    '1/2 cup canned black beans, rinsed & drained',
+                    '1/2 cup diced tomatoes & 1/3 cup corn kernels',
+                    '1 tsp chili powder & 1/2 tsp ground cumin',
+                    'Fresh cilantro & lime juice for topping'
                 ],
                 steps: [
-                    'Arrange tofu slices on a heatproof plate and steam over boiling water for 6 minutes.',
-                    'Blanch bok choy for 2 minutes until bright green and crisp-tender.',
-                    'Drizzle tofu and greens with garlic, sesame oil, and reduced-sodium soy sauce.'
-                ]
-            },
-            {
-                id: 'chia-matcha-pudding',
-                title: 'Matcha green tea chia pudding',
-                subtitle: 'Antioxidant-rich matcha paired with omega-3 chia seeds for calm, sustained focus.',
-                category: 'Mood & mind',
-                category2: 'Everyday healthy',
-                image: 'https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=1200&q=80',
-                time: '10 min',
-                costUSD: 2.30,
-                calories: 240,
-                protein: '8g',
-                carbs: '22g',
-                fiber: '10g',
-                sodium: '65mg',
-                potassium: '280mg',
-                omega3: '2.5g',
-                tags: ['Vegan', 'Halal', 'Gluten-Free', 'Antioxidant Rich'],
-                ingredients: [
-                    '1/3 cup chia seeds',
-                    '1 cup unsweetened soy or oat milk',
-                    '1 tsp culinary or ceremonial matcha powder',
-                    '1 tsp pure maple syrup or honey'
-                ],
-                steps: [
-                    'Whisk matcha powder into a splash of warm milk until smooth with no lumps, then add remaining milk and maple syrup.',
-                    'Stir in chia seeds, let rest 10 minutes, stir again, and chill for at least 3 hours.'
+                    'Cook lean ground turkey with chili powder and cumin in a skillet over medium heat until browned.',
+                    'Stir in rinsed black beans, diced tomatoes, and corn; simmer 5 minutes until heated through.',
+                    'Finish with fresh lime juice and cilantro.'
                 ]
             }
         ];
@@ -447,7 +575,7 @@
             apiKey: localStorage.getItem('nourish_gemini_key') || '',
             isTyping: false,
             messages: [
-                { role: 'assistant', content: 'Hello! I am your NourishAI nutrition guide. Tell me what ingredients you have in your kitchen, your health goal, or your budget, and I will build practical meals and healthy swaps for you!' }
+                { role: 'assistant', content: 'Hello! I am your NourishAI nutrition guide. I draw from curated recipes across **MedlinePlus**, **BBC Good Food**, **Jamie Oliver**, and **Budget Bytes**. Tell me what ingredients you have, your health goal, or your budget!' }
             ]
         };
 
@@ -467,18 +595,18 @@
             const goal = chatState.goal;
             const diet = chatState.diet;
 
-            // 1. If user provided a Gemini API key, call live Gemini 2.5 Flash
+            // 1. Live Gemini 2.5 Flash if user entered a free API key
             if (chatState.apiKey) {
                 try {
-                    const recipeSummary = RECIPES.map(r => `${r.title} (${window.formatPrice(r.costUSD)}, ${r.calories}kcal, ${r.protein} protein, tags: ${r.tags.join('/')})`).join('; ');
-                    const systemPrompt = `You are NourishAI, a warm, practical, evidence-informed nutrition and culturally aware recipe assistant.
+                    const recipeSummary = RECIPES.map(r => `[${r.source}] ${r.title} (${window.formatPrice(r.costUSD)}, ${r.calories}kcal, ${r.protein} protein, URL: ${r.sourceUrl})`).join('; ');
+                    const systemPrompt = `You are NourishAI, a warm, practical, evidence-informed nutrition assistant.
 User Profile:
 - Health Goal: ${goal}
 - Dietary Preference: ${diet}
 - Preferred Currency: ${currentCurrency}
-- Available Curated Recipes: ${recipeSummary}
+- Curated Recipe Library (from MedlinePlus, BBC Good Food, Jamie Oliver, and Budget Bytes): ${recipeSummary}
 
-Keep answers concise, encouraging, well-structured with bullet points, and grounded in practical everyday cooking. Include approximate costs in ${currentCurrency} when suggesting meals. Remind users gently that advice is educational.`;
+Recommend recipes specifically citing which of the four sources (MedlinePlus, BBC Good Food, Jamie Oliver, or Budget Bytes) they come from, with costs in ${currentCurrency}. Keep responses concise, structured with bullet points, and encouraging.`;
 
                     const conversationHistory = chatState.messages.slice(-6).map(m => ({
                         role: m.role === 'assistant' ? 'model' : 'user',
@@ -503,14 +631,14 @@ Keep answers concise, encouraging, well-structured with bullet points, and groun
                     } else {
                         const errData = await response.json().catch(() => ({}));
                         const errMsg = errData?.error?.message || 'Invalid API key or quota limit.';
-                        return `⚠️ **Live API Notice:** ${errMsg}\n\nFalling back to built-in nutrition guide:\n\n` + generateFallbackReply(userText);
+                        return `⚠️ **Live API Notice:** ${errMsg}\n\nUsing built-in recipe guide:\n\n` + generateFallbackReply(userText);
                     }
                 } catch (err) {
-                    return `⚠️ **Network Notice:** Could not reach Gemini API. Using built-in guide:\n\n` + generateFallbackReply(userText);
+                    return `⚠️ **Network Notice:** Could not reach Gemini API. Using built-in recipe guide:\n\n` + generateFallbackReply(userText);
                 }
             }
 
-            // 2. Built-in context-aware response engine (works offline/zero-setup)
+            // 2. Built-in context-aware response engine (works zero-setup)
             return generateFallbackReply(userText);
         }
 
@@ -524,8 +652,29 @@ Keep answers concise, encouraging, well-structured with bullet points, and groun
             else if (diet === 'Vegetarian') candidates = candidates.filter(r => r.tags.includes('Vegan') || r.tags.includes('Vegetarian'));
             else if (diet === 'Halal') candidates = candidates.filter(r => r.tags.some(t => t.includes('Halal')));
             else if (diet === 'Gluten-Free') candidates = candidates.filter(r => r.tags.some(t => t.includes('Gluten-Free')));
-            else if (diet === 'East Asian') candidates = candidates.filter(r => r.tags.includes('East Asian'));
             if (candidates.length === 0) candidates = RECIPES;
+
+            // Check if user asks for a specific website source
+            if (q.includes('medline')) {
+                const list = candidates.filter(r => r.source === 'MedlinePlus');
+                return `Here are our clinical nutrition picks from **MedlinePlus** (medlineplus.gov/recipes):\n\n` +
+                    list.map(r => `• **${r.title}** — ${window.formatPrice(r.costUSD)}/serving (${r.calories} kcal, ${r.sodium} sodium)`).join('\n');
+            }
+            if (q.includes('bbc')) {
+                const list = candidates.filter(r => r.source === 'BBC Good Food');
+                return `Here are our top picks from **BBC Good Food** (bbcgoodfood.com):\n\n` +
+                    list.map(r => `• **${r.title}** — ${window.formatPrice(r.costUSD)}/serving (${r.calories} kcal, ${r.protein} protein)`).join('\n');
+            }
+            if (q.includes('jamie')) {
+                const list = candidates.filter(r => r.source === 'Jamie Oliver');
+                return `Here are our vibrant picks from **Jamie Oliver** (jamieoliver.com):\n\n` +
+                    list.map(r => `• **${r.title}** — ${window.formatPrice(r.costUSD)}/serving (${r.calories} kcal, ${r.time})`).join('\n');
+            }
+            if (q.includes('budget bytes') || q.includes('meat') || q.includes('chicken') || q.includes('beef') || q.includes('turkey')) {
+                const list = candidates.filter(r => r.source === 'Budget Bytes' || r.tags.includes('High Protein'));
+                return `Here are affordable, protein-rich picks from **Budget Bytes** (budgetbytes.com/category/recipes/meat):\n\n` +
+                    list.slice(0, 3).map(r => `• **${r.title}** [${r.source}] — ${window.formatPrice(r.costUSD)}/serving (${r.protein} protein, ${r.calories} kcal)`).join('\n');
+            }
 
             // Match specific ingredients mentioned by user
             const matchedByIng = candidates.filter(r =>
@@ -535,36 +684,21 @@ Keep answers concise, encouraging, well-structured with bullet points, and groun
 
             if (matchedByIng.length > 0) {
                 const top = matchedByIng[0];
-                return `Based on the ingredients or dish you mentioned (and your **${diet}** preference), here is a great match:\n\n• **${top.title}** — ${window.formatPrice(top.costUSD)}/serving (${top.time})\n• **Nutrition:** ${top.calories} kcal • ${top.protein} protein • ${top.fiber} fiber\n• **Key Ingredients:** ${top.ingredients.slice(0, 4).join(', ')}\n\nWould you like step-by-step cooking instructions or a lower-sodium variation?`;
+                return `Found a match from **${top.source}** tailored to your **${diet}** preference:\n\n• **${top.title}** — ${window.formatPrice(top.costUSD)}/serving (${top.time})\n• **Nutrition:** ${top.calories} kcal • ${top.protein} protein • ${top.fiber} fiber\n• **Ingredients:** ${top.ingredients.slice(0, 4).join(', ')}\n\nOpen the **Recipes** tab to view the full steps and original **${top.source}** link!`;
             }
 
             if (q.includes('blood pressure') || q.includes('sodium') || q.includes('salt') || q.includes('dash')) {
-                const dish = candidates.find(r => r.id === 'lentil-ginger-bowl') || candidates[0];
-                return `For blood pressure support (**${goal}**), keeping sodium under 400mg per meal while boosting potassium is ideal:\n\n• **Top Pick:** **${dish.title}** (${window.formatPrice(dish.costUSD)}/serving • ${dish.sodium} sodium • ${dish.potassium} potassium).\n• **Flavor Swap:** Replace regular soy sauce or table salt with fresh lemon juice, grated ginger, garlic, and toasted sesame oil to cut sodium by over 50%.`;
+                const dish = candidates.find(r => r.source === 'MedlinePlus') || candidates[0];
+                return `For blood pressure support (**${goal}**), **${dish.source}** recommends keeping sodium low and potassium high:\n\n• **Top Pick:** **${dish.title}** [${dish.source}] (${window.formatPrice(dish.costUSD)}/serving • ${dish.sodium} sodium • ${dish.potassium} potassium).\n• **Quick Swap:** Use lemon juice, garlic, cumin, and fresh herbs instead of table salt.`;
             }
 
-            if (q.includes('budget') || q.includes('cheap') || q.includes('affordable') || q.includes('money') || q.includes('save')) {
+            if (q.includes('budget') || q.includes('cheap') || q.includes('affordable') || q.includes('money')) {
                 const cheapest = [...candidates].sort((a, b) => a.costUSD - b.costUSD).slice(0, 2);
-                return `Here are two high-nutrient, budget-friendly meals tailored to **${diet}** in **${currentCurrency}**:\n\n1. **${cheapest[0].title}** — ${window.formatPrice(cheapest[0].costUSD)}/serving (${cheapest[0].protein} protein, ${cheapest[0].calories} kcal)\n2. **${cheapest[1].title}** — ${window.formatPrice(cheapest[1].costUSD)}/serving (${cheapest[1].protein} protein, ${cheapest[1].calories} kcal)\n\nTip: Cooking with dry lentils, tofu, eggs, oats, and seasonal greens keeps meal costs low without sacrificing protein or fiber.`;
-            }
-
-            if (q.includes('sugar') || q.includes('diabetes') || q.includes('glucose') || q.includes('carb')) {
-                const lowGi = candidates.find(r => r.id === 'quinoa-black-bean-salad') || candidates[0];
-                return `To keep blood sugar steady for **${goal}**, pair complex carbohydrates with soluble fiber and lean protein:\n\n• **Recommended:** **${lowGi.title}** (${window.formatPrice(lowGi.costUSD)}/serving • ${lowGi.fiber} fiber • ${lowGi.protein} protein).\n• **Smart Swap:** Replace white rice or refined wheat noodles with 100% buckwheat soba, quinoa, or steamed tofu with leafy bok choy.`;
-            }
-
-            if (q.includes('protein') || q.includes('muscle') || q.includes('gym') || q.includes('workout')) {
-                const highProt = [...candidates].sort((a, b) => parseInt(b.protein) - parseInt(a.protein))[0];
-                return `For high-protein recovery tailored to **${diet}**:\n\n• **Top Option:** **${highProt.title}** delivers **${highProt.protein} protein** for ${window.formatPrice(highProt.costUSD)}/serving (${highProt.calories} kcal).\n• **Easy Boost:** Add 2 boiled eggs, 100g steamed tofu, or 1/2 cup edamame to any meal for an extra 12–15g of complete protein.`;
-            }
-
-            if (q.includes('breakfast') || q.includes('morning') || q.includes('quick') || q.includes('10 min')) {
-                const quick = candidates.find(r => r.id === 'oat-berry-breakfast') || candidates[0];
-                return `For a fast, stress-free option (**${diet}**), try **${quick.title}** (${window.formatPrice(quick.costUSD)}/serving, ready in ${quick.time}). It provides ${quick.protein} protein and ${quick.fiber} fiber for steady morning energy.`;
+                return `Here are two budget-friendly meals in **${currentCurrency}** from our partner sources:\n\n1. **${cheapest[0].title}** [${cheapest[0].source}] — ${window.formatPrice(cheapest[0].costUSD)}/serving (${cheapest[0].protein} protein)\n2. **${cheapest[1].title}** [${cheapest[1].source}] — ${window.formatPrice(cheapest[1].costUSD)}/serving (${cheapest[1].protein} protein)`;
             }
 
             const pick = candidates[Math.floor(Math.random() * candidates.length)];
-            return `Tailored to your **${goal}** goal and **${diet}** preference:\n\n• **Suggested Dish:** **${pick.title}** (${window.formatPrice(pick.costUSD)}/serving • ${pick.calories} kcal • ${pick.protein} protein)\n• **Why it works:** ${pick.subtitle}\n\nTell me specific ingredients you have on hand (like *chicken, tofu, oats, or salmon*) or ask for a meal plan!`;
+            return `Tailored to your **${goal}** goal and **${diet}** preference:\n\n• **Suggested Dish:** **${pick.title}** (from **${pick.source}**)\n• **Stats:** ${window.formatPrice(pick.costUSD)}/serving • ${pick.calories} kcal • ${pick.protein} protein\n• **Why it works:** ${pick.subtitle}`;
         }
 
         function formatMessageHTML(text) {
@@ -633,13 +767,13 @@ Keep answers concise, encouraging, well-structured with bullet points, and groun
                         <div class="space-y-6">
                             <div class="inline-flex items-center gap-2 bg-olive-200/60 px-3 py-1.5 rounded-full text-xs font-mono font-medium text-olive-800">
                                 <i data-lucide="sparkles" class="w-3.5 h-3.5 text-olive-700"></i>
-                                <span>AI Nutrition & Culture Guide</span>
+                                <span>MedlinePlus • BBC Good Food • Jamie Oliver • Budget Bytes</span>
                             </div>
                             <h1 class="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-olive-900 leading-[1.1]">
-                                Eat well for your body, culture, and budget—with clear answers you can trust.
+                                Eat well for your body, culture, and budget—with trusted recipes.
                             </h1>
                             <p class="text-lg text-olive-700 max-w-xl">
-                                Healthy recipes and interactive AI nutrition guidance for weight goals, blood pressure, aging, mood, allergies, and everyday “what should I cook?” moments.
+                                Curated recipes and interactive AI guidance sourced from MedlinePlus, BBC Good Food, Jamie Oliver, and Budget Bytes.
                             </p>
                             <div class="flex flex-wrap gap-4 pt-2">
                                 <a href="#/chat" class="bg-olive-700 hover:bg-olive-800 text-white font-medium px-6 py-3.5 rounded-xl shadow-sm transition flex items-center gap-2">
@@ -647,7 +781,7 @@ Keep answers concise, encouraging, well-structured with bullet points, and groun
                                     <span>Talk with a nutrition guide</span>
                                 </a>
                                 <a href="#/recipes" class="bg-white hover:bg-olive-50 text-olive-800 border border-olive-200 font-medium px-6 py-3.5 rounded-xl transition flex items-center gap-2">
-                                    <span>Browse healthy recipes</span>
+                                    <span>Browse all ${RECIPES.length} recipes</span>
                                 </a>
                             </div>
                         </div>
@@ -663,16 +797,16 @@ Keep answers concise, encouraging, well-structured with bullet points, and groun
                                 </div>
                                 <div>
                                     <h3 class="font-bold text-olive-900">Ask NourishAI</h3>
-                                    <p class="text-xs text-olive-600">Try a live question right here</p>
+                                    <p class="text-xs text-olive-600">Search across MedlinePlus, BBC Good Food, Jamie Oliver & Budget Bytes</p>
                                 </div>
                             </div>
                             <div id="hero-chat-box" class="space-y-3 text-sm mb-4 max-h-56 overflow-y-auto pr-1">
                                 <div class="bg-olive-50 p-3.5 rounded-2xl text-olive-800 border border-olive-100 text-xs leading-relaxed">
-                                    Ask me for a budget dinner, high-protein meal, or tell me what ingredients you have in <strong>${currentCurrency}</strong>!
+                                    Try asking: <em>"Show me Budget Bytes chicken recipes"</em> or <em>"Low sodium MedlinePlus dinner"</em> in <strong>${currentCurrency}</strong>!
                                 </div>
                             </div>
                             <form onsubmit="handleHeroChat(event)" class="flex gap-2">
-                                <input type="text" id="hero-chat-input" placeholder="e.g., Cheap dinner with tofu or salmon?" class="flex-grow px-3.5 py-2.5 text-xs bg-olive-50/70 border border-olive-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-olive-600">
+                                <input type="text" id="hero-chat-input" placeholder="e.g., Cheap Budget Bytes meat dinner?" class="flex-grow px-3.5 py-2.5 text-xs bg-olive-50/70 border border-olive-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-olive-600">
                                 <button type="submit" id="hero-chat-btn" class="bg-olive-700 hover:bg-olive-800 text-white px-4 py-2.5 rounded-xl text-xs font-medium transition">Ask</button>
                             </form>
                             <div class="mt-4 pt-3 border-t border-olive-100 flex justify-between items-center">
@@ -683,41 +817,60 @@ Keep answers concise, encouraging, well-structured with bullet points, and groun
                     </div>
                 </section>
 
-                <!-- Built for Real Life Constraints -->
-                <section class="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="text-center max-w-2xl mx-auto mb-12 space-y-3">
-                        <h2 class="font-serif text-3xl font-bold text-olive-900">Built for real-life constraints</h2>
-                        <p class="text-olive-700">Weight goals, blood pressure, aging, mood, faith-based diets, allergies, and tight budgets—pick a path and cook from there.</p>
+                <!-- Trusted Recipe Sources Directory -->
+                <section class="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center max-w-2xl mx-auto mb-10 space-y-2">
+                        <h2 class="font-serif text-3xl font-bold text-olive-900">Trusted Recipe Sources</h2>
+                        <p class="text-sm text-olive-700">Every recipe in NourishAI is curated from these four evidence-based and budget-friendly culinary libraries.</p>
                     </div>
 
                     <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <a href="#/recipes" class="bg-white p-6 rounded-2xl border border-olive-200 hover:border-olive-400 hover:shadow-md transition group">
-                            <div class="w-12 h-12 rounded-xl bg-olive-100 text-olive-700 flex items-center justify-center mb-4 group-hover:bg-olive-700 group-hover:text-white transition">
-                                <i data-lucide="scale" class="w-6 h-6"></i>
+                        <a href="https://medlineplus.gov/recipes/" target="_blank" rel="noopener noreferrer" class="bg-white p-6 rounded-2xl border border-olive-200 hover:border-olive-500 hover:shadow-md transition group flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">NIH Clinical</span>
+                                    <i data-lucide="external-link" class="w-4 h-4 text-olive-500 group-hover:text-olive-900"></i>
+                                </div>
+                                <h3 class="font-serif font-bold text-lg text-olive-900 mb-1">MedlinePlus Recipes</h3>
+                                <p class="text-xs text-olive-600">Heart-healthy, low-sodium, and diabetes-friendly recipes vetted by the U.S. National Library of Medicine.</p>
                             </div>
-                            <h3 class="font-serif font-bold text-lg text-olive-900 mb-1">Weight management</h3>
-                            <p class="text-xs text-olive-600">Lower-calorie, high-satiety meals that support steady weight goals.</p>
+                            <span class="text-xs font-mono text-olive-700 font-bold mt-4 inline-block">medlineplus.gov/recipes →</span>
                         </a>
-                        <a href="#/recipes" class="bg-white p-6 rounded-2xl border border-olive-200 hover:border-olive-400 hover:shadow-md transition group">
-                            <div class="w-12 h-12 rounded-xl bg-olive-100 text-olive-700 flex items-center justify-center mb-4 group-hover:bg-olive-700 group-hover:text-white transition">
-                                <i data-lucide="heart" class="w-6 h-6"></i>
+
+                        <a href="https://www.bbcgoodfood.com/" target="_blank" rel="noopener noreferrer" class="bg-white p-6 rounded-2xl border border-olive-200 hover:border-olive-500 hover:shadow-md transition group flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">Triple-Tested</span>
+                                    <i data-lucide="external-link" class="w-4 h-4 text-olive-500 group-hover:text-olive-900"></i>
+                                </div>
+                                <h3 class="font-serif font-bold text-lg text-olive-900 mb-1">BBC Good Food</h3>
+                                <p class="text-xs text-olive-600">Nutritionist-approved everyday meals with clear calorie, fiber, and macro breakdowns.</p>
                             </div>
-                            <h3 class="font-serif font-bold text-lg text-olive-900 mb-1">Blood pressure</h3>
-                            <p class="text-xs text-olive-600">DASH-inspired plates with less sodium and more potassium.</p>
+                            <span class="text-xs font-mono text-olive-700 font-bold mt-4 inline-block">bbcgoodfood.com →</span>
                         </a>
-                        <a href="#/recipes" class="bg-white p-6 rounded-2xl border border-olive-200 hover:border-olive-400 hover:shadow-md transition group">
-                            <div class="w-12 h-12 rounded-xl bg-olive-100 text-olive-700 flex items-center justify-center mb-4 group-hover:bg-olive-700 group-hover:text-white transition">
-                                <i data-lucide="sun" class="w-6 h-6"></i>
+
+                        <a href="https://www.jamieoliver.com/" target="_blank" rel="noopener noreferrer" class="bg-white p-6 rounded-2xl border border-olive-200 hover:border-olive-500 hover:shadow-md transition group flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200">Fresh & Fast</span>
+                                    <i data-lucide="external-link" class="w-4 h-4 text-olive-500 group-hover:text-olive-900"></i>
+                                </div>
+                                <h3 class="font-serif font-bold text-lg text-olive-900 mb-1">Jamie Oliver</h3>
+                                <p class="text-xs text-olive-600">Vibrant, vegetable-forward Mediterranean and family meals built for real weeknight speed.</p>
                             </div>
-                            <h3 class="font-serif font-bold text-lg text-olive-900 mb-1">Healthy aging</h3>
-                            <p class="text-xs text-olive-600">Protein, fiber, and bone-supporting nutrients for older adults.</p>
+                            <span class="text-xs font-mono text-olive-700 font-bold mt-4 inline-block">jamieoliver.com →</span>
                         </a>
-                        <a href="#/recipes" class="bg-white p-6 rounded-2xl border border-olive-200 hover:border-olive-400 hover:shadow-md transition group">
-                            <div class="w-12 h-12 rounded-xl bg-olive-100 text-olive-700 flex items-center justify-center mb-4 group-hover:bg-olive-700 group-hover:text-white transition">
-                                <i data-lucide="smile" class="w-6 h-6"></i>
+
+                        <a href="https://www.budgetbytes.com/category/recipes/meat/" target="_blank" rel="noopener noreferrer" class="bg-white p-6 rounded-2xl border border-olive-200 hover:border-olive-500 hover:shadow-md transition group flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-rose-50 text-rose-800 border border-rose-200">Cost-Tracked</span>
+                                    <i data-lucide="external-link" class="w-4 h-4 text-olive-500 group-hover:text-olive-900"></i>
+                                </div>
+                                <h3 class="font-serif font-bold text-lg text-olive-900 mb-1">Budget Bytes (Meat)</h3>
+                                <p class="text-xs text-olive-600">High-protein poultry, beef, and turkey skillets engineered to stretch every grocery dollar.</p>
                             </div>
-                            <h3 class="font-serif font-bold text-lg text-olive-900 mb-1">Mood & mind</h3>
-                            <p class="text-xs text-olive-600">Omega-3s, whole grains, and steady energy for mental wellbeing.</p>
+                            <span class="text-xs font-mono text-olive-700 font-bold mt-4 inline-block">budgetbytes.com →</span>
                         </a>
                     </div>
                 </section>
@@ -727,30 +880,31 @@ Keep answers concise, encouraging, well-structured with bullet points, and groun
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div class="flex justify-between items-end mb-10">
                             <div>
-                                <h2 class="font-serif text-3xl font-bold text-olive-900">Featured recipes</h2>
-                                <p class="text-xs font-mono text-olive-600 mt-1">Priced per serving in <span class="font-bold">${currentCurrency}</span>, tagged for allergies and dietary goals.</p>
+                                <h2 class="font-serif text-3xl font-bold text-olive-900">Featured recipes across all 4 sources</h2>
+                                <p class="text-xs font-mono text-olive-600 mt-1">Priced per serving in <span class="font-bold">${currentCurrency}</span> with direct source attribution.</p>
                             </div>
-                            <a href="#/recipes" class="text-sm font-bold text-olive-700 hover:text-olive-900 flex items-center gap-1">View all recipes <i data-lucide="arrow-right" class="w-4 h-4"></i></a>
+                            <a href="#/recipes" class="text-sm font-bold text-olive-700 hover:text-olive-900 flex items-center gap-1">View all ${RECIPES.length} recipes <i data-lucide="arrow-right" class="w-4 h-4"></i></a>
                         </div>
 
-                        <div class="grid md:grid-cols-3 gap-8">
-                            ${RECIPES.slice(0, 3).map(recipe => `
+                        <div class="grid md:grid-cols-4 gap-6">
+                            ${[RECIPES[0], RECIPES[3], RECIPES[6], RECIPES[9]].map(recipe => `
                                 <a href="#/recipes/${recipe.id}" class="bg-white rounded-2xl overflow-hidden border border-olive-200 hover:shadow-lg transition flex flex-col group">
-                                    <div class="relative h-52 overflow-hidden bg-olive-100">
+                                    <div class="relative h-44 overflow-hidden bg-olive-100">
                                         <img src="${recipe.image}" alt="${recipe.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                                         <div class="absolute top-3 left-3 flex flex-wrap gap-1.5">
-                                            <span class="bg-olive-900/80 backdrop-blur-xs text-white text-[10px] font-mono px-2.5 py-1 rounded-full">${recipe.category}</span>
+                                            <span class="bg-olive-900/90 backdrop-blur-xs text-white text-[10px] font-mono px-2.5 py-1 rounded-full">${recipe.source}</span>
                                         </div>
                                     </div>
-                                    <div class="p-6 flex flex-col flex-grow justify-between space-y-4">
-                                        <div class="space-y-2">
-                                            <h3 class="font-serif text-xl font-bold text-olive-900 group-hover:text-olive-700 transition">${recipe.title}</h3>
+                                    <div class="p-5 flex flex-col flex-grow justify-between space-y-4">
+                                        <div class="space-y-1.5">
+                                            <span class="text-[10px] font-mono uppercase text-olive-600 font-bold">${recipe.category}</span>
+                                            <h3 class="font-serif text-lg font-bold text-olive-900 group-hover:text-olive-700 transition leading-snug">${recipe.title}</h3>
                                             <p class="text-xs text-olive-700 line-clamp-2">${recipe.subtitle}</p>
                                         </div>
-                                        <div class="pt-4 border-t border-olive-100 flex items-center justify-between text-xs font-mono text-olive-700 font-medium">
-                                            <span class="flex items-center gap-1"><i data-lucide="clock" class="w-3.5 h-3.5"></i> ${recipe.time}</span>
-                                            <span class="font-bold text-olive-900">${window.formatPrice(recipe.costUSD)}/serving</span>
-                                            <span class="flex items-center gap-1"><i data-lucide="flame" class="w-3.5 h-3.5 text-amber-600"></i> ${recipe.calories} kcal</span>
+                                        <div class="pt-3 border-t border-olive-100 flex items-center justify-between text-xs font-mono text-olive-700 font-medium">
+                                            <span>${recipe.time}</span>
+                                            <span class="font-bold text-olive-900">${window.formatPrice(recipe.costUSD)}</span>
+                                            <span>${recipe.calories} kcal</span>
                                         </div>
                                     </div>
                                 </a>
@@ -793,23 +947,36 @@ Keep answers concise, encouraging, well-structured with bullet points, and groun
                     <div class="space-y-3">
                         <div class="inline-flex items-center gap-2 bg-olive-100 px-3 py-1 rounded-full text-xs font-mono font-medium text-olive-700">
                             <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
-                            <span>Curated Nutrition Recipes</span>
+                            <span>Curated Multi-Source Recipe Library</span>
                         </div>
                         <h1 class="font-serif text-4xl font-bold text-olive-900">Healthy Recipes Library</h1>
-                        <p class="text-olive-700 max-w-2xl">Every recipe includes transparent cost estimates in <span class="font-bold">${currentCurrency}</span>, macro breakdowns, and dietary tags.</p>
+                        <p class="text-olive-700 max-w-2xl">Browse recipes sourced from <strong>MedlinePlus</strong>, <strong>BBC Good Food</strong>, <strong>Jamie Oliver</strong>, and <strong>Budget Bytes</strong>, priced in <span class="font-bold">${currentCurrency}</span>.</p>
                     </div>
 
-                    <div class="flex flex-col sm:flex-row gap-4 items-center justify-between bg-white p-4 rounded-2xl border border-olive-200 shadow-xs">
-                        <div class="relative w-full sm:w-96">
-                            <i data-lucide="search" class="absolute left-3.5 top-3 w-4 h-4 text-olive-600"></i>
-                            <input type="text" id="recipe-search" placeholder="Search by ingredient, name, or goal..." oninput="filterRecipes()" class="w-full pl-10 pr-4 py-2 text-sm bg-olive-50/50 border border-olive-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-olive-600">
+                    <div class="bg-white p-4 rounded-2xl border border-olive-200 shadow-xs space-y-4">
+                        <div class="flex flex-col sm:flex-row gap-4 items-center justify-between">
+                            <div class="relative w-full sm:w-96">
+                                <i data-lucide="search" class="absolute left-3.5 top-3 w-4 h-4 text-olive-600"></i>
+                                <input type="text" id="recipe-search" placeholder="Search by ingredient, dish, or website..." oninput="filterRecipes()" class="w-full pl-10 pr-4 py-2 text-sm bg-olive-50/50 border border-olive-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-olive-600">
+                            </div>
+                            <div class="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+                                <span class="text-xs font-mono text-olive-600 font-bold shrink-0">Source:</span>
+                                <button onclick="filterSource('All', this)" class="source-btn text-xs font-mono font-medium px-3 py-1.5 rounded-xl bg-olive-700 text-white shrink-0">All (${RECIPES.length})</button>
+                                <button onclick="filterSource('MedlinePlus', this)" class="source-btn text-xs font-mono font-medium px-3 py-1.5 rounded-xl bg-olive-100 text-olive-800 hover:bg-olive-200 shrink-0">MedlinePlus</button>
+                                <button onclick="filterSource('BBC Good Food', this)" class="source-btn text-xs font-mono font-medium px-3 py-1.5 rounded-xl bg-olive-100 text-olive-800 hover:bg-olive-200 shrink-0">BBC Good Food</button>
+                                <button onclick="filterSource('Jamie Oliver', this)" class="source-btn text-xs font-mono font-medium px-3 py-1.5 rounded-xl bg-olive-100 text-olive-800 hover:bg-olive-200 shrink-0">Jamie Oliver</button>
+                                <button onclick="filterSource('Budget Bytes', this)" class="source-btn text-xs font-mono font-medium px-3 py-1.5 rounded-xl bg-olive-100 text-olive-800 hover:bg-olive-200 shrink-0">Budget Bytes</button>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
-                            <button onclick="filterCategory('All', this)" class="filter-btn text-xs font-mono font-medium px-3.5 py-2 rounded-xl bg-olive-700 text-white shrink-0">All (${RECIPES.length})</button>
-                            <button onclick="filterCategory('Weight management', this)" class="filter-btn text-xs font-mono font-medium px-3.5 py-2 rounded-xl bg-olive-100 text-olive-800 hover:bg-olive-200 shrink-0">Weight Loss</button>
-                            <button onclick="filterCategory('Blood pressure', this)" class="filter-btn text-xs font-mono font-medium px-3.5 py-2 rounded-xl bg-olive-100 text-olive-800 hover:bg-olive-200 shrink-0">Blood Pressure</button>
-                            <button onclick="filterCategory('Blood sugar', this)" class="filter-btn text-xs font-mono font-medium px-3.5 py-2 rounded-xl bg-olive-100 text-olive-800 hover:bg-olive-200 shrink-0">Blood Sugar</button>
-                            <button onclick="filterCategory('Mood & mind', this)" class="filter-btn text-xs font-mono font-medium px-3.5 py-2 rounded-xl bg-olive-100 text-olive-800 hover:bg-olive-200 shrink-0">Mood & Mind</button>
+
+                        <div class="flex items-center gap-2 overflow-x-auto pt-2 border-t border-olive-100">
+                            <span class="text-xs font-mono text-olive-600 font-bold shrink-0">Health Goal:</span>
+                            <button onclick="filterCategory('All', this)" class="filter-btn text-xs font-mono font-medium px-3 py-1.5 rounded-xl bg-olive-900 text-white shrink-0">All Goals</button>
+                            <button onclick="filterCategory('Weight management', this)" class="filter-btn text-xs font-mono font-medium px-3 py-1.5 rounded-xl bg-olive-50 text-olive-800 hover:bg-olive-100 border border-olive-200/60 shrink-0">Weight Loss</button>
+                            <button onclick="filterCategory('Blood pressure', this)" class="filter-btn text-xs font-mono font-medium px-3 py-1.5 rounded-xl bg-olive-50 text-olive-800 hover:bg-olive-100 border border-olive-200/60 shrink-0">Blood Pressure</button>
+                            <button onclick="filterCategory('Blood sugar', this)" class="filter-btn text-xs font-mono font-medium px-3 py-1.5 rounded-xl bg-olive-50 text-olive-800 hover:bg-olive-100 border border-olive-200/60 shrink-0">Blood Sugar</button>
+                            <button onclick="filterCategory('Mood & mind', this)" class="filter-btn text-xs font-mono font-medium px-3 py-1.5 rounded-xl bg-olive-50 text-olive-800 hover:bg-olive-100 border border-olive-200/60 shrink-0">Mood & Mind</button>
+                            <button onclick="filterCategory('Healthy aging', this)" class="filter-btn text-xs font-mono font-medium px-3 py-1.5 rounded-xl bg-olive-50 text-olive-800 hover:bg-olive-100 border border-olive-200/60 shrink-0">Healthy Aging</button>
                         </div>
                     </div>
 
@@ -829,7 +996,8 @@ Keep answers concise, encouraging, well-structured with bullet points, and groun
                     <div class="relative h-52 overflow-hidden bg-olive-100">
                         <img src="${recipe.image}" alt="${recipe.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                         <div class="absolute top-3 left-3 flex flex-wrap gap-1.5">
-                            <span class="bg-olive-900/80 backdrop-blur-xs text-white text-[10px] font-mono px-2.5 py-1 rounded-full">${recipe.category}</span>
+                            <span class="bg-olive-900/90 backdrop-blur-xs text-white text-[10px] font-mono font-bold px-2.5 py-1 rounded-full">${recipe.source}</span>
+                            <span class="bg-white/90 backdrop-blur-xs text-olive-900 text-[10px] font-mono px-2.5 py-1 rounded-full">${recipe.category}</span>
                         </div>
                     </div>
                     <div class="p-6 flex flex-col flex-grow justify-between space-y-4">
@@ -837,7 +1005,7 @@ Keep answers concise, encouraging, well-structured with bullet points, and groun
                             <h3 class="font-serif text-xl font-bold text-olive-900 group-hover:text-olive-700 transition">${recipe.title}</h3>
                             <p class="text-xs text-olive-700 line-clamp-2">${recipe.subtitle}</p>
                             <div class="flex flex-wrap gap-1 pt-1">
-                                ${recipe.tags.map(t => `<span class="text-[10px] font-mono bg-olive-50 text-olive-700 px-2 py-0.5 rounded-md border border-olive-200/50">${t}</span>`).join('')}
+                                ${recipe.tags.filter(t => t !== recipe.source).map(t => `<span class="text-[10px] font-mono bg-olive-50 text-olive-700 px-2 py-0.5 rounded-md border border-olive-200/50">${t}</span>`).join('')}
                             </div>
                         </div>
                         <div class="pt-4 border-t border-olive-100 flex items-center justify-between text-xs font-mono text-olive-700 font-medium">
@@ -855,6 +1023,7 @@ Keep answers concise, encouraging, well-structured with bullet points, and groun
             const filtered = RECIPES.filter(r =>
                 r.title.toLowerCase().includes(query) ||
                 r.subtitle.toLowerCase().includes(query) ||
+                r.source.toLowerCase().includes(query) ||
                 r.category.toLowerCase().includes(query) ||
                 r.tags.some(t => t.toLowerCase().includes(query))
             );
@@ -862,14 +1031,28 @@ Keep answers concise, encouraging, well-structured with bullet points, and groun
             if (window.lucide) lucide.createIcons();
         };
 
-        window.filterCategory = function(cat, btnEl) {
-            document.querySelectorAll('.filter-btn').forEach(btn => {
+        window.filterSource = function(src, btnEl) {
+            document.querySelectorAll('.source-btn').forEach(btn => {
                 btn.classList.remove('bg-olive-700', 'text-white');
                 btn.classList.add('bg-olive-100', 'text-olive-800');
             });
             if (btnEl) {
                 btnEl.classList.add('bg-olive-700', 'text-white');
                 btnEl.classList.remove('bg-olive-100', 'text-olive-800');
+            }
+            const filtered = src === 'All' ? RECIPES : RECIPES.filter(r => r.source === src);
+            document.getElementById('recipes-grid').innerHTML = renderRecipeCards(filtered);
+            if (window.lucide) lucide.createIcons();
+        };
+
+        window.filterCategory = function(cat, btnEl) {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('bg-olive-900', 'text-white');
+                btn.classList.add('bg-olive-50', 'text-olive-800');
+            });
+            if (btnEl) {
+                btnEl.classList.add('bg-olive-900', 'text-white');
+                btnEl.classList.remove('bg-olive-50', 'text-olive-800');
             }
             const filtered = cat === 'All' ? RECIPES : RECIPES.filter(r => r.category === cat || r.category2 === cat);
             document.getElementById('recipes-grid').innerHTML = renderRecipeCards(filtered);
@@ -881,10 +1064,17 @@ Keep answers concise, encouraging, well-structured with bullet points, and groun
             const recipe = RECIPES.find(r => r.id === recipeId) || RECIPES[0];
             container.innerHTML = `
                 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
-                    <a href="#/recipes" class="inline-flex items-center gap-2 text-sm font-medium text-olive-700 hover:text-olive-900"><i data-lucide="arrow-left" class="w-4 h-4"></i> Back to recipes</a>
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <a href="#/recipes" class="inline-flex items-center gap-2 text-sm font-medium text-olive-700 hover:text-olive-900"><i data-lucide="arrow-left" class="w-4 h-4"></i> Back to recipes</a>
+                        <a href="${recipe.sourceUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 bg-olive-900 hover:bg-olive-800 text-white text-xs font-mono px-4 py-2 rounded-xl transition">
+                            <span>Visit ${recipe.source}</span>
+                            <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                        </a>
+                    </div>
                     
                     <div class="space-y-4">
                         <div class="flex flex-wrap gap-2">
+                            <span class="bg-olive-900 text-white text-xs font-mono font-bold px-3 py-1 rounded-full">Source: ${recipe.source}</span>
                             <span class="bg-olive-200 text-olive-900 text-xs font-mono font-medium px-3 py-1 rounded-full">${recipe.category}</span>
                             ${recipe.category2 ? `<span class="bg-olive-100 text-olive-800 text-xs font-mono font-medium px-3 py-1 rounded-full">${recipe.category2}</span>` : ''}
                         </div>
@@ -927,9 +1117,9 @@ Keep answers concise, encouraging, well-structured with bullet points, and groun
                                 `).join('')}
                             </ul>
                             <div class="pt-6 border-t border-olive-100">
-                                <button onclick="askAboutRecipe('${recipe.title.replace(/'/g, "\\'")}')" class="w-full bg-olive-100 hover:bg-olive-200 text-olive-900 text-sm font-medium py-3 rounded-xl flex items-center justify-center gap-2 transition">
+                                <button onclick="askAboutRecipe('${recipe.title.replace(/'/g, "\\'")}', '${recipe.source}')" class="w-full bg-olive-100 hover:bg-olive-200 text-olive-900 text-sm font-medium py-3 rounded-xl flex items-center justify-center gap-2 transition">
                                     <i data-lucide="sparkles" class="w-4 h-4 text-olive-700"></i>
-                                    <span>Ask AI how to adapt this recipe</span>
+                                    <span>Ask AI how to adapt this ${recipe.source} recipe</span>
                                 </button>
                             </div>
                         </div>
@@ -976,8 +1166,8 @@ Keep answers concise, encouraging, well-structured with bullet points, and groun
             `;
         }
 
-        window.askAboutRecipe = async function(title) {
-            const prompt = `How can I adapt "${title}" for my diet and budget?`;
+        window.askAboutRecipe = async function(title, source) {
+            const prompt = `How can I adapt "${title}" from ${source} for my diet and budget?`;
             chatState.messages.push({ role: 'user', content: prompt });
             window.location.hash = '#/chat';
             const reply = await getAIResponse(prompt);
@@ -996,7 +1186,7 @@ Keep answers concise, encouraging, well-structured with bullet points, and groun
                         <div class="lg:col-span-1 bg-white p-6 rounded-3xl border border-olive-200 space-y-6 h-fit">
                             <div>
                                 <h3 class="font-serif text-lg font-bold text-olive-900">AI Chat Settings</h3>
-                                <p class="text-xs text-olive-600 mt-1">Customize your goals or connect a free Gemini API key for live AI.</p>
+                                <p class="text-xs text-olive-600 mt-1">Customize your goals or connect a free Gemini API key.</p>
                             </div>
 
                             <div class="space-y-4 text-sm">
@@ -1019,7 +1209,6 @@ Keep answers concise, encouraging, well-structured with bullet points, and groun
                                         <option ${chatState.diet === 'Vegetarian' ? 'selected' : ''}>Vegetarian</option>
                                         <option ${chatState.diet === 'Vegan' ? 'selected' : ''}>Vegan</option>
                                         <option ${chatState.diet === 'Gluten-Free' ? 'selected' : ''}>Gluten-Free</option>
-                                        <option ${chatState.diet === 'East Asian' ? 'selected' : ''}>East Asian</option>
                                     </select>
                                 </div>
 
@@ -1033,11 +1222,12 @@ Keep answers concise, encouraging, well-structured with bullet points, and groun
                                 </div>
 
                                 <div class="space-y-1.5 pt-2 border-t border-olive-100">
-                                    <label class="text-xs font-mono text-olive-700 font-bold uppercase">Quick Prompts</label>
+                                    <label class="text-xs font-mono text-olive-700 font-bold uppercase">Browse by Website</label>
                                     <div class="flex flex-col gap-2 pt-1">
-                                        <button type="button" onclick="sendQuickPrompt('Suggest an affordable high-protein meal under budget')" class="text-left text-xs bg-olive-50 hover:bg-olive-100 text-olive-800 p-2.5 rounded-xl border border-olive-200/70 transition">💰 Budget high-protein meal</button>
-                                        <button type="button" onclick="sendQuickPrompt('Low sodium ideas for blood pressure')" class="text-left text-xs bg-olive-50 hover:bg-olive-100 text-olive-800 p-2.5 rounded-xl border border-olive-200/70 transition">❤️ Low-sodium blood pressure</button>
-                                        <button type="button" onclick="sendQuickPrompt('I have tofu, bok choy, and garlic. What can I make?')" class="text-left text-xs bg-olive-50 hover:bg-olive-100 text-olive-800 p-2.5 rounded-xl border border-olive-200/70 transition">🥬 Cook with what I have</button>
+                                        <button type="button" onclick="sendQuickPrompt('Show me MedlinePlus recipes')" class="text-left text-xs bg-olive-50 hover:bg-olive-100 text-olive-800 p-2.5 rounded-xl border border-olive-200/70 transition">🏥 MedlinePlus clinical recipes</button>
+                                        <button type="button" onclick="sendQuickPrompt('Show me BBC Good Food recipes')" class="text-left text-xs bg-olive-50 hover:bg-olive-100 text-olive-800 p-2.5 rounded-xl border border-olive-200/70 transition">🇬🇧 BBC Good Food healthy picks</button>
+                                        <button type="button" onclick="sendQuickPrompt('Show me Jamie Oliver recipes')" class="text-left text-xs bg-olive-50 hover:bg-olive-100 text-olive-800 p-2.5 rounded-xl border border-olive-200/70 transition">🌿 Jamie Oliver fresh meals</button>
+                                        <button type="button" onclick="sendQuickPrompt('Show me Budget Bytes meat recipes')" class="text-left text-xs bg-olive-50 hover:bg-olive-100 text-olive-800 p-2.5 rounded-xl border border-olive-200/70 transition">💰 Budget Bytes affordable meat</button>
                                     </div>
                                 </div>
                             </div>
@@ -1089,7 +1279,7 @@ Keep answers concise, encouraging, well-structured with bullet points, and groun
 
                             <div class="p-4 border-t border-olive-100 bg-cream-50/50 rounded-b-3xl">
                                 <form onsubmit="handleChatSubmit(event)" class="flex gap-2">
-                                    <input type="text" id="chat-input" ${chatState.isTyping ? 'disabled' : ''} placeholder="Ask about nutrition, recipes, ingredients, or meal swaps..." class="flex-grow px-4 py-3 text-sm bg-white border border-olive-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-olive-600">
+                                    <input type="text" id="chat-input" ${chatState.isTyping ? 'disabled' : ''} placeholder="Ask about MedlinePlus, BBC Good Food, Jamie Oliver, or Budget Bytes recipes..." class="flex-grow px-4 py-3 text-sm bg-white border border-olive-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-olive-600">
                                     <button type="submit" ${chatState.isTyping ? 'disabled' : ''} class="bg-olive-700 hover:bg-olive-800 disabled:opacity-50 text-white px-6 py-3 rounded-xl font-medium text-sm flex items-center gap-2 shadow-sm transition shrink-0">
                                         <span>Send</span>
                                         <i data-lucide="send" class="w-4 h-4"></i>
@@ -1106,7 +1296,7 @@ Keep answers concise, encouraging, well-structured with bullet points, and groun
 
         window.clearChat = function() {
             chatState.messages = [
-                { role: 'assistant', content: 'Chat cleared. How can I help you plan your next meal?' }
+                { role: 'assistant', content: 'Chat cleared. Ask me about any recipe from MedlinePlus, BBC Good Food, Jamie Oliver, or Budget Bytes!' }
             ];
             renderChat(document.getElementById('app'));
             if (window.lucide) lucide.createIcons();
@@ -1181,7 +1371,7 @@ Keep answers concise, encouraging, well-structured with bullet points, and groun
             const val = document.getElementById('analyze-input').value.trim();
             if (!val) return;
             const lower = val.toLowerCase();
-            const isHealthy = lower.includes('salad') || lower.includes('steamed') || lower.includes('lentil') || lower.includes('oat') || lower.includes('salmon') || lower.includes('tofu');
+            const isHealthy = lower.includes('salad') || lower.includes('steamed') || lower.includes('lentil') || lower.includes('oat') || lower.includes('salmon') || lower.includes('cod') || lower.includes('chicken');
 
             const resultsEl = document.getElementById('analyze-results');
             resultsEl.innerHTML = isHealthy ? `
@@ -1200,7 +1390,7 @@ Keep answers concise, encouraging, well-structured with bullet points, and groun
                         <p class="text-xl font-bold text-olive-900 mt-1">8.8 / 10</p>
                     </div>
                 </div>
-                <p class="text-sm text-olive-700">This meal features whole ingredients rich in fiber, lean protein, or unsaturated fats. Pair it with a glass of water or unsweetened tea to keep added sugars near zero.</p>
+                <p class="text-sm text-olive-700">This meal features whole ingredients rich in fiber, lean protein, or unsaturated fats—matching clinical nutrition standards from MedlinePlus and BBC Good Food.</p>
             ` : `
                 <h3 class="font-serif text-2xl font-bold text-olive-900">Evaluation Report: Room for Easy Swaps</h3>
                 <div class="grid sm:grid-cols-3 gap-4">
@@ -1220,8 +1410,8 @@ Keep answers concise, encouraging, well-structured with bullet points, and groun
                 <div class="space-y-2 pt-4 border-t border-olive-100 text-sm text-olive-700">
                     <p class="font-bold text-olive-900">Practical Swaps:</p>
                     <ul class="list-disc pl-5 space-y-1">
-                        <li>Switch deep-fried or creamy bases to steamed, boiled, or air-fried preparations.</li>
-                        <li>Add a side of leafy greens (bok choy, spinach, or broccoli) to boost potassium and fiber.</li>
+                        <li>Switch deep-fried or processed meats to lean skillet chicken thighs or ground turkey (see our Budget Bytes recipes).</li>
+                        <li>Add a side of leafy greens or shredded cabbage to boost potassium and fiber.</li>
                         <li>Swap sugary drinks for unsweetened green tea or lemon water.</li>
                     </ul>
                 </div>
@@ -1237,10 +1427,10 @@ Keep answers concise, encouraging, well-structured with bullet points, and groun
                     <div class="space-y-3">
                         <div class="inline-flex items-center gap-2 bg-olive-100 px-3 py-1 rounded-full text-xs font-mono font-medium text-olive-700">
                             <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
-                            <span>Budget & Goal Meal Planning</span>
+                            <span>Multi-Source Daily Meal Planning</span>
                         </div>
                         <h1 class="font-serif text-4xl font-bold text-olive-900">Custom Meal Planner</h1>
-                        <p class="text-olive-700">Generate a balanced daily outline in <span class="font-bold">${currentCurrency}</span> tailored to your goal.</p>
+                        <p class="text-olive-700">Generate a balanced daily outline in <span class="font-bold">${currentCurrency}</span> across MedlinePlus, BBC Good Food, Jamie Oliver, and Budget Bytes.</p>
                     </div>
 
                     <div class="bg-white p-6 sm:p-8 rounded-3xl border border-olive-200 shadow-sm grid sm:grid-cols-3 gap-6">
@@ -1248,7 +1438,7 @@ Keep answers concise, encouraging, well-structured with bullet points, and groun
                             <label class="text-xs font-mono font-bold text-olive-700 uppercase block mb-2">Dietary Filter</label>
                             <select id="planner-diet" class="w-full text-sm bg-olive-50 border border-olive-200 rounded-xl p-3 text-olive-900 font-medium">
                                 <option value="All">All Meals</option>
-                                <option value="Vegan">Vegan</option>
+                                <option value="Vegetarian">Vegetarian</option>
                                 <option value="Halal">Halal</option>
                                 <option value="Gluten-Free">Gluten-Free</option>
                             </select>
@@ -1284,7 +1474,7 @@ Keep answers concise, encouraging, well-structured with bullet points, and groun
             const shuffled = [...pool].sort(() => 0.5 - Math.random()).slice(0, 3);
             const totalCost = shuffled.reduce((sum, r) => sum + r.costUSD, 0);
             const totalCal = shuffled.reduce((sum, r) => sum + r.calories, 0);
-            const labels = ['Breakfast', 'Lunch', 'Dinner'];
+            const labels = ['Breakfast / Light Meal', 'Lunch', 'Dinner'];
 
             document.getElementById('planner-output').innerHTML = `
                 <div class="bg-white p-8 rounded-3xl border border-olive-200 shadow-sm space-y-6">
@@ -1300,7 +1490,10 @@ Keep answers concise, encouraging, well-structured with bullet points, and groun
                         ${shuffled.map((meal, i) => `
                             <div class="bg-olive-50/50 p-6 rounded-2xl border border-olive-100 space-y-3 flex flex-col justify-between">
                                 <div class="space-y-2">
-                                    <span class="text-xs font-mono font-bold text-olive-700 uppercase">${labels[i]}</span>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs font-mono font-bold text-olive-700 uppercase">${labels[i]}</span>
+                                        <span class="text-[10px] font-mono bg-olive-900 text-white px-2 py-0.5 rounded-full">${meal.source}</span>
+                                    </div>
                                     <h4 class="font-serif font-bold text-lg text-olive-900"><a href="#/recipes/${meal.id}" class="hover:underline">${meal.title}</a></h4>
                                     <p class="text-xs text-olive-700">${meal.subtitle}</p>
                                 </div>
